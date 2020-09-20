@@ -1,4 +1,25 @@
+import React from "react";
 import Styled from "styled-components";
+
+import Img from "../Img";
+import EmptyImg from "../../assets/images/empty.jpg";
+
+export const File = ({ src, width, height }) => {
+    if (!src) {
+        return (
+            <Img
+                src={EmptyImg}
+                style={{
+                    width: "100%",
+                    maxWidth: width || "200px",
+                    maxHeight: height,
+                }}
+            />
+        );
+    }
+
+    return <Img src={src} style={{ maxWidth: width, maxHeight: height }} />;
+};
 
 const Index = Styled.input`
     width: 100%;
@@ -8,9 +29,8 @@ const Index = Styled.input`
     background-color: var(--gray-5);
     border: 0;
     border-radius: 5px;
-    margin-bottom: 0.2rem;
-    font-size: 0.5rem;
-    padding: 0.5rem 0.4rem;
+    margin-bottom: 1rem;
+    padding: 1.4rem 1.4rem;
 
     box-shadow: var(--input-shadow);
 `;

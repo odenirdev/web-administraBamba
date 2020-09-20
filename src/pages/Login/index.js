@@ -17,6 +17,7 @@ const Background = Styled.div`
     min-height: 100vh;
     background-image: url(${Passista});
     background-repeat: no-repeat;
+    background-size: cover;
 `;
 
 const Container = Styled.div`
@@ -32,13 +33,15 @@ const Container = Styled.div`
     align-items: center;
     flex-direction: column;
 
+    padding: 0 1rem;
+
     @media (max-width: 750px) {
         width: 100%;
     }
 `;
 
 const Header = Styled.header`
-    margin-bottom: 0.5rem;
+    width: 100%;
 
     & h1 {
         display: flex;
@@ -70,11 +73,18 @@ const Index = () => {
                     </h1>
                 </Header>
                 <Form min-width="300px" sm-min-width="260px">
-                    <Input placeholder="Nome de usuário ou e-mail" />
-                    <Input placeholder="Entre com sua senha" />
+                    <Input
+                        type="text"
+                        placeholder="Nome de usuário ou e-mail"
+                    />
+                    <Input type="password" placeholder="Entre com sua senha" />
                     <Col>
                         <GridButtons className="flex-column">
-                            <Button>
+                            <Button
+                                onClick={() => {
+                                    history.push("/register-school");
+                                }}
+                            >
                                 <FaSignInAlt />
                                 Entrar
                             </Button>
