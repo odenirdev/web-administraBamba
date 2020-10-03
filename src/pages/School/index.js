@@ -12,7 +12,7 @@ import SchoolModal from "../../modals/School";
 import UserModal from "../../modals/User";
 
 import Api from "../../services/api";
-import Notification, { Error } from "../../modules/notifications";
+import { Error } from "../../modules/notifications";
 
 const UsersContainer = Styled.div`
     margin-top: 0.5rem;
@@ -180,7 +180,14 @@ const Index = () => {
                     setShowUser(false);
                 }}
             >
-                <UserModal user={selectedUser} updateUsers={indexUsers} />
+                <UserModal
+                    user={selectedUser}
+                    updateUsers={indexUsers}
+                    onClose={() => {
+                        setSelectedUser({});
+                        setShowUser(false);
+                    }}
+                />
             </Modal>
             <Container>
                 <SchoolInfo

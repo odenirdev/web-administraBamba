@@ -23,7 +23,7 @@ const Container = Styled.div`
     justify-content: center;
 `;
 
-const Index = ({ user, updateUsers }) => {
+const Index = ({ user, updateUsers, onClose }) => {
     const [data, setData] = useState({ image: {} });
     const [me, setMe] = useState({});
 
@@ -87,8 +87,8 @@ const Index = ({ user, updateUsers }) => {
             await Api.post(`/users/`, data);
 
             Notification("success", "Usuário cadastrado");
-            setData({ username: "", email: "", role: "", image: {} });
             updateUsers();
+            onClose();
         } catch (error) {
             return Error(error);
         }
@@ -105,15 +105,22 @@ const Index = ({ user, updateUsers }) => {
         }
     }
 
-    async function destroy() {
-        try {
-            await Api.delete(`/users/${data.id}`);
+    function destroy() {
+        Confirm(
+            "Remover Usuário",
+            "Essa operação não pode ser desfeita, tem certeza ?",
+            async () => {
+                try {
+                    await Api.delete(`/users/${data.id}`);
 
-            Notification("success", "Usuário removido");
-            updateUsers();
-        } catch (error) {
-            return Error(error);
-        }
+                    Notification("success", "Usuário removido");
+                    updateUsers();
+                    onClose();
+                } catch (error) {
+                    return Error(error);
+                }
+            }
+        );
     }
 
     async function uploadFile(file) {
@@ -233,7 +240,7 @@ const Index = ({ user, updateUsers }) => {
                             role: parseInt(event.target.value),
                         });
                     }}
-                    disabled={!(me.role === 4)}
+                    readOnly={!(me.role === 4)}
                 >
                     <option value="">Selecione...</option>
                     <option value="4">Administrador</option>

@@ -351,7 +351,9 @@ const Index = ({ school, indexSchool, me }) => {
                         >
                             <option value="">Selecione...</option>
                             {ufs.map((uf) => (
-                                <option value={uf}>{uf}</option>
+                                <option key={uf} value={uf}>
+                                    {uf}
+                                </option>
                             ))}
                         </Select>
                     </FormItem>

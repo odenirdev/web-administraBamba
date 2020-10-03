@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import Styled from "styled-components";
 import { Link } from "react-router-dom";
 import { FaUserCog, FaSignOutAlt } from "react-icons/fa";
+import { useHistory } from "react-router-dom";
 
 import Notifications from "../../components/Notifications";
 import User from "../../components/NavBarUser";
@@ -98,6 +99,8 @@ const UserGrid = Styled.div`
 `;
 
 const Index = () => {
+    const history = useHistory();
+
     const [show, setShow] = useState(false);
 
     const [drop, setDrop] = useState(false);
@@ -149,7 +152,12 @@ const Index = () => {
                 </Link>
             </UserGrid>
             <Container>
-                <Header>
+                <Header
+                    onClick={() => {
+                        history.push("/");
+                    }}
+                    className="cursor-pointer"
+                >
                     <Img src={Logo} width="52px" height="52px" />
                     <h1>AdministraBamba</h1>
                 </Header>

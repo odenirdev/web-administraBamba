@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import Styled from "styled-components";
 import { FaTimes } from "react-icons/fa";
 
@@ -25,7 +25,7 @@ const Button = Styled.button`
 `;
 
 const Grid = Styled.div`
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
@@ -39,6 +39,7 @@ const Grid = Styled.div`
 `;
 
 const Container = Styled.div`
+    position: absolute;
     width: 100%;
     max-width: 600px;
     min-width: 280px;
@@ -52,10 +53,10 @@ const Container = Styled.div`
     @keyframes animation {
         from {
             opacity: 0;
-            transform: scale(0.7, 0.7);
+            transform: scale(0);
         } to {
             opacity: 1;
-            transform: scale(1, 1);
+            transform: scale(1);
         }
     }
 `;
@@ -85,18 +86,6 @@ const Section = Styled.section`
 `;
 
 const Index = ({ show, title, children, onClose }) => {
-    useEffect(() => {
-        if (show) {
-            const body = document.querySelector("body");
-
-            window.scrollTo({ top: 0 });
-            body.style.overflow = "hidden";
-            return;
-        }
-
-        document.querySelector("body").style.overflow = "auto";
-    }, [show]);
-
     return (
         <Grid show={show || false}>
             <Container>

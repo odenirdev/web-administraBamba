@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Styled from "styled-components";
 import { Col } from "react-bootstrap";
 import { FaEdit } from "react-icons/fa";
@@ -11,6 +11,9 @@ import Task from "../../components/Task";
 
 import BoardModal from "../../modals/Board";
 import TaskModal from "../../modals/Task";
+
+import Api from "../../services/api";
+import { Error } from "../../modules/notifications";
 
 const Header = Styled.header.attrs({
     className: "row",
@@ -56,20 +59,16 @@ const Description = Styled(Title)`
     }
 `;
 
-const Board = Styled.div`
+const Boards = Styled.div`
     width: 100%;
     display: flex;
     justify-content: space-between;
 `;
 
-const Column = Styled.div`
+const Board = Styled.div`
     background-color: var(--gray-5);
     border: 1px solid var(--color-primary);
     width: 33%;
-
-    max-height: 600px;
-    overflow-y: auto;
-
 
     & header {
         display: flex;
@@ -83,14 +82,26 @@ const Column = Styled.div`
     }
 `;
 
+const Dropzone = Styled.div.attrs({
+    className: "dropzone",
+})`
+    width: 100%;
+    max-height: 500px;
+    overflow-y: auto;
+
+    transition: 400ms;
+`;
+
 const AddContainer = Styled.div`
     display: flex;
     flex-direction: row-reverse;
     padding: 0.5rem;
 `;
 
-const Index = () => {
+const Index = (props) => {
     const [search, setSearch] = useState("");
+
+    const [me, setMe] = useState("");
 
     const [showBoard, setShowBoard] = useState(false);
 
@@ -98,24 +109,110 @@ const Index = () => {
 
     const [selectedTask, setSelectedTask] = useState({});
 
-    const [board, setBoard] = useState({
-        title: "Minhas Tarefas",
-        description: "Suas tarefas de todos os quadros serão dispostas aqui",
-    });
+    const [board, setBoard] = useState({});
 
-    const [tasks, setTasks] = useState([
-        {
-            title: "Confeccionar 200 fantasias",
-            createdAt: "18/08/2020",
-            dueDate: "31/08/2020",
-        },
-    ]);
+    const [allTasks, setAllTasks] = useState([]);
+
+    const [filteredTasks, setFilteredTasks] = useState([]);
+
+    const [tasks, setTasks] = useState([]);
+
+    const [doing, setDoing] = useState([]);
+
+    const [done, setDone] = useState([]);
+
+    useEffect(() => {
+        async function showMe() {
+            try {
+                const response = await Api.get("/users/me");
+
+                try {
+                    setMe({ ...response.data, role: response.data.role.id });
+                } catch (err) {}
+            } catch (error) {
+                Error(error);
+            }
+        }
+
+        showMe();
+    }, []);
+
+    const indexTasks = useCallback(() => {
+        async function indexTasks() {
+            try {
+                const response = await Api.get(
+                    `/tasks?_limit=-1&board=${board.id}`
+                );
+
+                setAllTasks(response.data);
+            } catch (error) {
+                Error(error);
+            }
+        }
+
+        indexTasks();
+    }, [board.id]);
+
+    useEffect(() => {
+        indexTasks();
+    }, [indexTasks]);
+
+    useEffect(() => {
+        const tasks = filteredTasks.filter((task) => task.status === 1);
+
+        const doing = filteredTasks.filter((task) => task.status === 2);
+
+        const done = filteredTasks.filter((task) => task.status === 3);
+
+        setTasks(tasks);
+        setDoing(doing);
+        setDone(done);
+    }, [filteredTasks]);
+
+    useEffect(() => {
+        if (search) {
+            const filteredTasks = allTasks.filter((task) => {
+                return (
+                    task.title.includes(search) ||
+                    new Date(task.created_at)
+                        .toLocaleDateString()
+                        .includes(search) ||
+                    new Date(task.dueDate).toLocaleDateString().includes(search)
+                );
+            });
+
+            setFilteredTasks(filteredTasks);
+        } else {
+            setFilteredTasks(allTasks);
+        }
+    }, [allTasks, search]);
+
+    const indexBoard = useCallback(() => {
+        async function show() {
+            try {
+                const { id } = props.match.params;
+
+                const response = await Api.get(`/boards/${id}`);
+
+                setBoard(response.data);
+            } catch (error) {
+                Error(error);
+            }
+        }
+
+        show();
+    }, [props.match.params]);
+
+    useEffect(() => {
+        indexBoard();
+    }, [indexBoard]);
 
     return (
         <>
             <Modal
                 show={showTask}
                 onClose={() => {
+                    setSelectedTask({});
                     setShowTask(false);
                 }}
                 title={
@@ -124,17 +221,34 @@ const Index = () => {
                         : `Tarefa ${selectedTask.title}`
                 }
             >
-                <TaskModal task={selectedTask} />
+                <TaskModal
+                    id={selectedTask.id}
+                    idBoard={board.id}
+                    me={me}
+                    index={indexTasks}
+                    onClose={() => {
+                        setShowTask(false);
+                        setSelectedTask({});
+                    }}
+                />
             </Modal>
             <Modal
                 show={showBoard}
+                title={`Quadro ${board.title}`}
                 onClose={() => {
                     setShowBoard(false);
-                    setSelectedTask({});
+                    setSelectedTask({ users: [] });
                 }}
-                title={`Quadro ${board.title}`}
             >
-                <BoardModal board={board} />
+                <BoardModal
+                    board={board}
+                    me={me}
+                    onClose={() => {
+                        setShowBoard(false);
+                        setSelectedTask({});
+                    }}
+                    index={indexBoard}
+                />
             </Modal>
             <Container>
                 <Header sm="12" md="8">
@@ -158,18 +272,22 @@ const Index = () => {
                         />
                     </Col>
                 </Header>
-                <Board>
-                    <Column>
+                <Boards>
+                    <Board>
                         <header>Tarefas</header>
-                        {tasks.map((task) => (
-                            <Task
-                                {...task}
-                                onClick={() => {
-                                    setSelectedTask(task);
-                                    setShowTask(true);
-                                }}
-                            />
-                        ))}
+                        <Dropzone>
+                            {tasks.map((task) => (
+                                <Task
+                                    key={task.id}
+                                    {...task}
+                                    onClick={() => {
+                                        setSelectedTask(task);
+                                        setShowTask(true);
+                                    }}
+                                />
+                            ))}
+                        </Dropzone>
+
                         <AddContainer>
                             <AddButton
                                 onClick={() => {
@@ -178,14 +296,38 @@ const Index = () => {
                                 }}
                             />
                         </AddContainer>
-                    </Column>
-                    <Column>
+                    </Board>
+                    <Board>
                         <header>Fazendo</header>
-                    </Column>
-                    <Column>
+                        <Dropzone>
+                            {doing.map((task) => (
+                                <Task
+                                    key={task.id}
+                                    {...task}
+                                    onClick={() => {
+                                        setSelectedTask(task);
+                                        setShowTask(true);
+                                    }}
+                                />
+                            ))}
+                        </Dropzone>
+                    </Board>
+                    <Board>
                         <header>Concluídas</header>
-                    </Column>
-                </Board>
+                        <Dropzone>
+                            {done.map((task) => (
+                                <Task
+                                    key={task.id}
+                                    {...task}
+                                    onClick={() => {
+                                        setSelectedTask(task);
+                                        setShowTask(true);
+                                    }}
+                                />
+                            ))}
+                        </Dropzone>
+                    </Board>
+                </Boards>
             </Container>
         </>
     );

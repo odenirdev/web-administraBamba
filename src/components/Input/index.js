@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Styled, { css } from "styled-components";
 import Dropzone from "react-dropzone";
-import { FaImage, FaTrash, FaEye, FaFilePdf } from "react-icons/fa";
-
-import Img from "../Img";
-import EmptyImg from "../../assets/images/empty.jpg";
+import { FaImage, FaTrash, FaEye } from "react-icons/fa";
 
 const FileGrid = Styled.div`
     display: flex;

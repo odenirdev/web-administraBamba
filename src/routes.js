@@ -38,7 +38,7 @@ const Index = () => (
             <Route exact path="/reset-password" component={ResetPassword} />
             <Authenticated exact path="/" component={Home} />
             <Authenticated exact path="/boards" component={Boards} />
-            <Authenticated exact path="/board" component={Board} />
+            <Authenticated exact path="/board/:id" component={Board} />
             <Authenticated exact path="/school" component={School} />
             <Authenticated
                 exact

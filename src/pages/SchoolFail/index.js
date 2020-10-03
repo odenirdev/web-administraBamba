@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import Styled from "styled-components";
 
 import Passista from "../../assets/images/Passista.png";
