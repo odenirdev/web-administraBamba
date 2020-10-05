@@ -64,7 +64,9 @@ const Index = () => {
     return (
         <Container>
             <hr />
-            <h1>Relatório de Quadros</h1>
+            <header>
+                <h1>Relatório de Quadros</h1>
+            </header>
             <Table>
                 <thead>
                     <tr>
