@@ -240,7 +240,7 @@ const Index = ({ user, updateUsers, onClose }) => {
                             role: parseInt(event.target.value),
                         });
                     }}
-                    readOnly={!(me.role === 4)}
+                    disabled={!(me.role === 4)}
                 >
                     <option value="">Selecione...</option>
                     <option value="4">Administrador</option>

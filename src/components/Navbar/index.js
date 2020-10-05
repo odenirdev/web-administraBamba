@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { FaUserCog, FaSignOutAlt } from "react-icons/fa";
 import { useHistory } from "react-router-dom";
 
-import Notifications from "../../components/Notifications";
+//import Notifications from "../../components/Notifications";
 import User from "../../components/NavBarUser";
 import Modal from "../../components/Modal";
 import Button from "../../components/Button";
