@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Styled from "styled-components";
 
 import Container from "../../components/Container";
@@ -10,6 +10,9 @@ import Modal from "../../components/Modal";
 
 import SchoolModal from "../../modals/School";
 import UserModal from "../../modals/User";
+
+import Api from "../../services/api";
+import { Error } from "../../modules/notifications";
 
 const UsersContainer = Styled.div`
     margin-top: 0.5rem;
@@ -34,19 +37,7 @@ const Section = Styled.section`
 const Index = () => {
     const [search, setSearch] = useState("");
 
-    const [school, setSchool] = useState({
-        image:
-            "http://amantesdocarnavalsp.com.br//wp-content/uploads/2015/07/carnavalsp_logo-prova-de-fogo-13-995x1024.jpg",
-        name: "Prova de Fogo",
-        foundationDate: "16/06/1974",
-        description:
-            "O Grêmio Recreativo Cultural e Social Escola de Samba Prova de Fogo foi fundado em 16 de junho de 1974, em Pirituba, bairro de São Paulo, Capital.",
-        state: "SP",
-        city: "São Paulo",
-        neighborhood: "Vila Leopoldina",
-        address: "Rua Julião Machado",
-        number: 257,
-    });
+    const [school, setSchool] = useState({ image: {} });
 
     const [selectedUser, setSelectedUser] = useState({});
 
@@ -54,49 +45,105 @@ const Index = () => {
 
     const [showUser, setShowUser] = useState(false);
 
-    const [administrators, setAdministrators] = useState([
-        {
-            name: "Odenir Gomes",
-            email: "odenirdev@gmail.com",
-            access_level: 3,
-        },
-        {
-            name: "Odenir Gomes",
-            email: "odenirdev@gmail.com",
-            access_level: 3,
-        },
-        {
-            name: "Odenir Gomes",
-            email: "odenirdev@gmail.com",
-            access_level: 3,
-        },
-    ]);
+    const [users, setUsers] = useState([]);
 
-    const [managers, setManagers] = useState([
-        {
-            name: "Odenir Gomes",
-            email: "odenirdev@gmail.com",
-            access_level: 2,
-        },
-    ]);
+    const [filteredUsers, setFilteredUsers] = useState([]);
 
-    const [users, setUsers] = useState([
-        {
-            name: "Odenir Gomes",
-            email: "odenirdev@gmail.com",
-            access_level: 1,
-        },
-        {
-            name: "Odenir Gomes",
-            email: "odenirdev@gmail.com",
-            access_level: 1,
-        },
-        {
-            name: "Odenir Gomes",
-            email: "odenirdev@gmail.com",
-            access_level: 1,
-        },
-    ]);
+    const [administrators, setAdministrators] = useState([]);
+
+    const [managers, setManagers] = useState([]);
+
+    const [components, setComponents] = useState([]);
+
+    const [me, setMe] = useState([]);
+
+    const indexUsers = useCallback(() => {
+        async function index() {
+            try {
+                const response = await Api.get(
+                    "/users?_limit=-1&_sort=username:ASC"
+                );
+
+                setUsers(response.data);
+            } catch (error) {
+                Error(error);
+            }
+        }
+
+        index();
+    }, []);
+
+    const indexSchool = useCallback(() => {
+        async function indexSchool() {
+            try {
+                const response = await Api.get("/schools");
+
+                setSchool(response.data[0]);
+            } catch (error) {
+                Error(error);
+            }
+        }
+
+        indexSchool();
+    }, []);
+
+    useEffect(() => {
+        indexSchool();
+    }, [indexSchool]);
+
+    useEffect(() => {
+        indexUsers();
+    }, [indexUsers]);
+
+    useEffect(() => {
+        const array = search ? filteredUsers : users;
+
+        const components = array.filter((item) => {
+            return item.role.id === 1;
+        });
+
+        const managers = array.filter((item) => {
+            return item.role.id === 3;
+        });
+
+        const administrators = array.filter((item) => {
+            return item.role.id === 4;
+        });
+
+        setComponents(components);
+
+        setManagers(managers);
+
+        setAdministrators(administrators);
+    }, [filteredUsers, search, users]);
+
+    useEffect(() => {
+        if (search) {
+            const filteredUsers = users.filter(
+                (user) =>
+                    user.username.includes(search) ||
+                    user.email.includes(search)
+            );
+
+            setFilteredUsers(filteredUsers);
+        }
+    }, [search, users]);
+
+    useEffect(() => {
+        async function showMe() {
+            try {
+                const response = await Api.get("/users/me");
+
+                try {
+                    setMe({ ...response.data, role: response.data.role.id });
+                } catch (err) {}
+            } catch (error) {
+                Error(error);
+            }
+        }
+
+        showMe();
+    }, []);
 
     const handleAddUser = () => {
         setSelectedUser({});
@@ -115,26 +162,38 @@ const Index = () => {
                 title="Minha Escola"
                 onClose={() => setShowSchool(false)}
             >
-                <SchoolModal school={school} />
+                <SchoolModal
+                    school={school}
+                    indexSchool={indexSchool}
+                    me={me}
+                />
             </Modal>
             <Modal
                 show={showUser}
                 title={
                     Object.keys(selectedUser).length === 0
                         ? "Novo Usuário"
-                        : `Usuário ${selectedUser.name}`
+                        : `Usuário ${selectedUser.username}`
                 }
                 onClose={() => {
                     setSelectedUser({});
                     setShowUser(false);
                 }}
             >
-                <UserModal user={selectedUser} />
+                <UserModal
+                    user={selectedUser}
+                    updateUsers={indexUsers}
+                    onClose={() => {
+                        setSelectedUser({});
+                        setShowUser(false);
+                    }}
+                />
             </Modal>
             <Container>
                 <SchoolInfo
                     school={school}
                     onClick={() => setShowSchool(true)}
+                    me={me}
                 />
                 <UsersContainer>
                     <Header>
@@ -144,25 +203,31 @@ const Index = () => {
                             max-width="250px"
                             onChange={(event) => setSearch(event.target.value)}
                         />
-                        <AddButton onClick={handleAddUser} />
+                        {me.role === 4 && <AddButton onClick={handleAddUser} />}
                     </Header>
-                    <Section>
-                        <h2>Diretoria</h2>
-                        {administrators.length !== 0 &&
-                            administrators.map((user) => (
+
+                    {administrators.length !== 0 && (
+                        <Section>
+                            <h2>Administradores</h2>
+                            {administrators.map((user) => (
                                 <User
+                                    meRole={me.role}
+                                    key={user.id}
                                     user={user}
                                     onClick={() => {
                                         handleShowUser(user);
                                     }}
                                 />
                             ))}
-                    </Section>
+                        </Section>
+                    )}
                     {managers.length !== 0 && (
                         <Section>
-                            <h2>Harmonia</h2>
+                            <h2>Diretoria</h2>
                             {managers.map((user) => (
                                 <User
+                                    meRole={me.role}
+                                    key={user.id}
                                     user={user}
                                     onClick={() => {
                                         handleShowUser(user);
@@ -172,11 +237,13 @@ const Index = () => {
                         </Section>
                     )}
 
-                    {users.length !== 0 && (
+                    {components.length !== 0 && (
                         <Section>
                             <h2>Componentes</h2>
-                            {users.map((user) => (
+                            {components.map((user) => (
                                 <User
+                                    meRole={me.role}
+                                    key={user.id}
                                     user={user}
                                     onClick={() => {
                                         handleShowUser(user);

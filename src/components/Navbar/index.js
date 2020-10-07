@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Styled from "styled-components";
 import { Link } from "react-router-dom";
 import { FaUserCog, FaSignOutAlt } from "react-icons/fa";
+import { useHistory } from "react-router-dom";
 
-import Notifications from "../../components/Notifications";
+//import Notifications from "../../components/Notifications";
 import User from "../../components/NavBarUser";
 import Modal from "../../components/Modal";
 import Button from "../../components/Button";
@@ -11,6 +12,9 @@ import Button from "../../components/Button";
 import Profile from "../../modals/Profile";
 
 import Logo from "../../assets/images/Logo.png";
+
+import Api from "../../services/api";
+import { Error } from "../../modules/notifications";
 
 const Container = Styled.div`
     width: 100%;
@@ -95,9 +99,33 @@ const UserGrid = Styled.div`
 `;
 
 const Index = () => {
+    const history = useHistory();
+
     const [show, setShow] = useState(false);
 
     const [drop, setDrop] = useState(false);
+
+    const [image, setImage] = useState("");
+
+    const [user, setUser] = useState({});
+
+    useEffect(() => {
+        async function show() {
+            try {
+                const response = await Api.get("/users/me");
+
+                if (response.data.image.url) {
+                    setImage(Api.defaults.baseURL + response.data.image.url);
+                }
+
+                setUser(response.data);
+            } catch (error) {
+                Error(error);
+            }
+        }
+
+        show();
+    }, []);
 
     return (
         <>
@@ -106,7 +134,7 @@ const Index = () => {
                 show={show}
                 onClose={() => setShow(false)}
             >
-                <Profile />
+                <Profile user={user} />
             </Modal>
             <UserGrid show={drop}>
                 <Button
@@ -118,19 +146,26 @@ const Index = () => {
                     <FaUserCog />
                     Gerenciar conta
                 </Button>
-                <Link to="/">
+                <Link to="/auth">
                     <FaSignOutAlt />
                     Sair
                 </Link>
             </UserGrid>
             <Container>
-                <Header>
+                <Header
+                    onClick={() => {
+                        history.push("/");
+                    }}
+                    className="cursor-pointer"
+                >
                     <Img src={Logo} width="52px" height="52px" />
                     <h1>AdministraBamba</h1>
                 </Header>
                 <Section>
-                    <Notifications />
-                    <User onClick={() => setDrop(!drop)} />
+                    {
+                        // <Notifications />
+                    }
+                    <User src={image} onClick={() => setDrop(!drop)} />
                 </Section>
             </Container>
         </>

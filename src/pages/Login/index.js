@@ -1,8 +1,8 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Styled from "styled-components";
 import { FaSignInAlt } from "react-icons/fa";
 import { Col } from "react-bootstrap";
-import { useHistory } from "react-router-dom";
+import { useHistory, Link } from "react-router-dom";
 
 import Passista from "../../assets/images/Passista.png";
 import LogoImg from "../../assets/images/Logo.png";
@@ -11,6 +11,9 @@ import Form, { GridButtons } from "../../components/Form";
 import Input from "../../components/Input";
 import Button from "../../components/Button";
 import Hr from "../../components/Hr";
+
+import Notification, { Error } from "../../modules/notifications";
+import Api from "../../services/api";
 
 const Background = Styled.div`
     min-width: 100vw;
@@ -60,8 +63,47 @@ const Logo = Styled.img`
     height: 64px;
 `;
 
+const StyledForm = Styled(Form)`
+    & a {
+        color: var(--purple-1);
+        filter: brightness(110%);
+    }
+`;
+
 const Index = () => {
     const history = useHistory();
+    const [identifier, setIdentifier] = useState("");
+    const [password, setPassword] = useState("");
+
+    useEffect(() => {
+        localStorage.clear();
+    }, []);
+
+    async function handleSubmit(event) {
+        try {
+            event.preventDefault();
+
+            if (!identifier || !password) {
+                return Notification(
+                    "warning",
+                    "Nome de usuário e senha são obrigatórios"
+                );
+            }
+
+            const response = await Api.post(
+                "/auth/local",
+                { identifier, password },
+                { headers: { Authorization: "" } }
+            );
+
+            localStorage.setItem("token", `Bearer ${response.data.jwt}`);
+            Api.defaults.headers.Authorization = `Bearer ${response.data.jwt}`;
+
+            history.push("/");
+        } catch (error) {
+            return Error(error);
+        }
+    }
 
     return (
         <Background>
@@ -72,19 +114,27 @@ const Index = () => {
                         <span>AdministraBamba</span>
                     </h1>
                 </Header>
-                <Form min-width="300px" sm-min-width="260px">
+                <StyledForm
+                    min-width="300px"
+                    sm-min-width="260px"
+                    onSubmit={handleSubmit}
+                >
                     <Input
                         type="text"
                         placeholder="Nome de usuário ou e-mail"
+                        value={identifier}
+                        onChange={(event) => setIdentifier(event.target.value)}
                     />
-                    <Input type="password" placeholder="Entre com sua senha" />
+                    <Input
+                        type="password"
+                        placeholder="Entre com sua senha"
+                        value={password}
+                        onChange={(event) => setPassword(event.target.value)}
+                    />
+                    <Link to="/forgot-password">Esqueci minha senha</Link>
                     <Col>
                         <GridButtons className="flex-column">
-                            <Button
-                                onClick={() => {
-                                    history.push("/register-school");
-                                }}
-                            >
+                            <Button type="submit">
                                 <FaSignInAlt />
                                 Entrar
                             </Button>
@@ -101,7 +151,7 @@ const Index = () => {
                             </Button>
                         </GridButtons>
                     </Col>
-                </Form>
+                </StyledForm>
             </Container>
         </Background>
     );

@@ -1,19 +1,19 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import Styled from "styled-components";
 import { Col } from "react-bootstrap";
-import { FaEdit } from "react-icons/fa";
 
 import Container from "../../components/Container";
 import { Input } from "../../components/Form";
-import Modal from "../../components/Modal";
-import AddButton from "../../components/AddButton";
 import Task from "../../components/Task";
+import Modal from "../../components/Modal";
+import Table from "../../components/TableAdmin";
 
-import BoardModal from "../../modals/Board";
 import TaskModal from "../../modals/Task";
 
 import Api from "../../services/api";
-import { Error } from "../../modules/notifications";
+
+import SchoolFail from "../../pages/SchoolFail";
+import RegisterSchool from "../../pages/RegisterSchool";
 
 const Header = Styled.header.attrs({
     className: "row",
@@ -87,39 +87,48 @@ const Dropzone = Styled.div.attrs({
 })`
     width: 100%;
     max-height: 500px;
+    min-height: 200px;
     overflow-y: auto;
 
     transition: 400ms;
 `;
 
-const AddContainer = Styled.div`
-    display: flex;
-    flex-direction: row-reverse;
-    padding: 0.5rem;
-`;
+const Index = () => {
+    const [statusSchool, setStatusSchool] = useState(0);
 
-const Index = (props) => {
+    const [me, setMe] = useState(0);
+
     const [search, setSearch] = useState("");
-
-    const [me, setMe] = useState("");
-
-    const [showBoard, setShowBoard] = useState(false);
-
-    const [showTask, setShowTask] = useState(false);
-
-    const [selectedTask, setSelectedTask] = useState({});
-
-    const [board, setBoard] = useState({});
 
     const [allTasks, setAllTasks] = useState([]);
 
     const [filteredTasks, setFilteredTasks] = useState([]);
+
+    const [selectedTask, setSelectedTask] = useState([]);
+
+    const [showTask, setShowTask] = useState(false);
 
     const [tasks, setTasks] = useState([]);
 
     const [doing, setDoing] = useState([]);
 
     const [done, setDone] = useState([]);
+
+    useEffect(() => {
+        async function authSchool() {
+            const response = await Api.get("/schools/count");
+
+            if (response.data === 0) {
+                if (me.role === 4) {
+                    setStatusSchool(1);
+                } else {
+                    setStatusSchool(2);
+                }
+            }
+        }
+
+        authSchool();
+    }, [me.role]);
 
     useEffect(() => {
         async function showMe() {
@@ -141,7 +150,7 @@ const Index = (props) => {
         async function indexTasks() {
             try {
                 const response = await Api.get(
-                    `/tasks?_limit=-1&board=${board.id}`
+                    `/tasks?_limit=-1&users_in=${me.id}`
                 );
 
                 setAllTasks(response.data);
@@ -151,23 +160,11 @@ const Index = (props) => {
         }
 
         indexTasks();
-    }, [board.id]);
+    }, [me.id]);
 
     useEffect(() => {
         indexTasks();
     }, [indexTasks]);
-
-    useEffect(() => {
-        const tasks = filteredTasks.filter((task) => task.status === 1);
-
-        const doing = filteredTasks.filter((task) => task.status === 2);
-
-        const done = filteredTasks.filter((task) => task.status === 3);
-
-        setTasks(tasks);
-        setDoing(doing);
-        setDone(done);
-    }, [filteredTasks]);
 
     useEffect(() => {
         if (search) {
@@ -187,33 +184,33 @@ const Index = (props) => {
         }
     }, [allTasks, search]);
 
-    const indexBoard = useCallback(() => {
-        async function show() {
-            try {
-                const { id } = props.match.params;
-
-                const response = await Api.get(`/boards/${id}`);
-
-                setBoard(response.data);
-            } catch (error) {
-                Error(error);
-            }
-        }
-
-        show();
-    }, [props.match.params]);
-
     useEffect(() => {
-        indexBoard();
-    }, [indexBoard]);
+        const tasks = filteredTasks.filter((task) => task.status === 1);
+
+        const doing = filteredTasks.filter((task) => task.status === 2);
+
+        const done = filteredTasks.filter((task) => task.status === 3);
+
+        setTasks(tasks);
+        setDoing(doing);
+        setDone(done);
+    }, [filteredTasks]);
+
+    if (statusSchool === 1) {
+        return <RegisterSchool />;
+    }
+
+    if (statusSchool === 2) {
+        return <SchoolFail />;
+    }
 
     return (
         <>
             <Modal
                 show={showTask}
                 onClose={() => {
-                    setSelectedTask({});
                     setShowTask(false);
+                    setSelectedTask({});
                 }}
                 title={
                     Object.keys(selectedTask).length === 0
@@ -223,7 +220,6 @@ const Index = (props) => {
             >
                 <TaskModal
                     id={selectedTask.id}
-                    idBoard={board.id}
                     me={me}
                     index={indexTasks}
                     onClose={() => {
@@ -232,36 +228,20 @@ const Index = (props) => {
                     }}
                 />
             </Modal>
-            <Modal
-                show={showBoard}
-                title={`Quadro ${board.title}`}
-                onClose={() => {
-                    setShowBoard(false);
-                    setSelectedTask({ users: [] });
-                }}
-            >
-                <BoardModal
-                    board={board}
-                    me={me}
-                    onClose={() => {
-                        setShowBoard(false);
-                        setSelectedTask({});
-                    }}
-                    index={indexBoard}
-                />
-            </Modal>
-            <Container>
+            <Container outChild={me.role === 4 && <Table />}>
                 <Header sm="12" md="8">
                     <Information>
                         <Title>
                             <h3>Título</h3>
-                            <span>{board.title}</span>
+                            <span>Minhas Tarefas</span>
                         </Title>
                         <Description>
                             <h3>Descrição</h3>
-                            <span>{board.description}</span>
+                            <span>
+                                Todas as tarefas em que você contribui estão
+                                disposta aqui
+                            </span>
                         </Description>
-                        <FaEdit onClick={() => setShowBoard(true)} />
                     </Information>
                     <Col sm="12" md="4">
                         <Input
@@ -287,15 +267,6 @@ const Index = (props) => {
                                 />
                             ))}
                         </Dropzone>
-
-                        <AddContainer>
-                            <AddButton
-                                onClick={() => {
-                                    setSelectedTask({});
-                                    setShowTask(true);
-                                }}
-                            />
-                        </AddContainer>
                     </Board>
                     <Board>
                         <header>Fazendo</header>

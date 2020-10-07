@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Row, Col } from "react-bootstrap";
 import Styled from "styled-components";
+import StyledReactSelect from "react-select";
 
 import StyledInput from "../Input";
 import StyledTextArea from "../TextArea";
@@ -87,6 +88,15 @@ export const Select = (props) => {
             >
                 {props.children}
             </StyledSelect>
+        </StyledLabel>
+    );
+};
+
+export const ReactSelect = (props) => {
+    return (
+        <StyledLabel>
+            <span>{props.label}</span>
+            <StyledReactSelect {...props} />
         </StyledLabel>
     );
 };

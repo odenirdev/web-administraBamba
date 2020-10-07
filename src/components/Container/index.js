@@ -15,6 +15,7 @@ const Index = (props) => {
         <Container>
             <Navbar />
             <Main>{props.children}</Main>
+            {props.outChild}
             <Menu />
         </Container>
     );

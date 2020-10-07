@@ -1,11 +1,13 @@
 import React from "react";
 import Styled from "styled-components";
 import { Col } from "react-bootstrap";
-import { FaEdit } from "react-icons/fa";
+import { FaEdit, FaEye } from "react-icons/fa";
 
 import Img from "../Img";
 
 import EmptyImage from "../../assets/images/empty.jpg";
+
+import Api from "../../services/api";
 
 const Grid = Styled(Col)`
     margin: 0.5rem 0;
@@ -85,20 +87,26 @@ const HoverContainer = Styled.div.attrs({
     }
 `;
 
-const Index = ({ user, onClick }) => {
+const Index = ({ user, onClick, meRole }) => {
     return (
         <Grid md="6" sm="12">
             <Container onClick={onClick}>
                 <HoverContainer>
-                    <FaEdit />
+                    {meRole === 4 ? <FaEdit /> : <FaEye />}
                 </HoverContainer>
                 <ImageContainer sm="3">
-                    <StyledImg src={user.image || EmptyImage} />
+                    <StyledImg
+                        src={
+                            !(Object.keys(user.image).length === 0)
+                                ? Api.defaults.baseURL + user.image.url
+                                : EmptyImage
+                        }
+                    />
                 </ImageContainer>
                 <FieldsContainer sm="7">
                     <Field>
                         <h3>Nome</h3>
-                        <span>{user.name}</span>
+                        <span>{user.username}</span>
                     </Field>
                     <Field>
                         <h3>E-mail</h3>

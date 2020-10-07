@@ -7,6 +7,10 @@ import Button from "../../components/Button";
 import Form, { Input } from "../../components/Form";
 import { File } from "../../components/Input";
 
+import Notification, { Error } from "../../modules/notifications";
+
+import Api, { requestPublic } from "../../services/api";
+
 const Container = Styled.div`
     width: 100%;
     min-height: 100vh;
@@ -42,33 +46,127 @@ const Index = () => {
     const history = useHistory();
 
     const [data, setData] = useState({
-        name: "",
+        username: "",
         email: "",
         password: "",
         confirmPassword: "",
+        image: {},
     });
+
+    function handleValidate() {
+        if (!data.username) {
+            return { status: false, message: "Nome é obrigatório" };
+        }
+
+        if (!data.email) {
+            return { status: false, message: "E-mail é obrigatório" };
+        }
+
+        if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(data.email)) {
+            return { status: false, message: "E-mail inválido!" };
+        }
+
+        if (!data.password) {
+            return { status: false, message: "Senha é obrigatório" };
+        }
+
+        if (!data.confirmPassword) {
+            return {
+                status: false,
+                message: "Confirmação de senha é obrigatório",
+            };
+        }
+
+        if (data.password !== data.confirmPassword) {
+            return { status: false, message: "Confirmação de senha inválida" };
+        }
+
+        return { status: true };
+    }
+
+    async function uploadFile(file) {
+        let data = new FormData();
+        data.append(`files`, file);
+        const response = await Api.post("/upload", data, requestPublic);
+        return response.data[0];
+    }
+
+    async function handleSubmit(e) {
+        e.preventDefault();
+        try {
+            const validate = handleValidate();
+            if (!validate.status) {
+                return Notification("warning", validate.message);
+            }
+
+            try {
+                if (!(Object.keys(data.image.file).length === 0)) {
+                    const image = await uploadFile(data.image.file);
+                    data.image = image;
+                } else {
+                    data.image = {};
+                }
+            } catch (error) {
+                data.image = {};
+            }
+
+            const response = await Api.post(
+                "/auth/local/register",
+                data,
+                requestPublic
+            );
+
+            localStorage.setItem("token", `Bearer ${response.data.jwt}`);
+            Api.defaults.headers.Authorization = `Bearer ${response.data.jwt}`;
+
+            history.push("/");
+        } catch (error) {
+            Error(error);
+        }
+    }
 
     return (
         <Container>
             <Header>
                 <h1>Cadastrar Usuário</h1>
             </Header>
-            <Form>
+            <Form onSubmit={handleSubmit}>
                 <Row className="d-flex justify-content-center">
-                    <File width="120px" height="120px" />
+                    <File
+                        width={120}
+                        height={120}
+                        file={data.image}
+                        onUpload={(files) => {
+                            const file = files[0];
+
+                            setData({
+                                ...data,
+                                image: {
+                                    file,
+                                    preview: URL.createObjectURL(file),
+                                },
+                            });
+                        }}
+                        onDeleteFile={() => {
+                            setData({
+                                ...data,
+                                image: {},
+                            });
+                        }}
+                    />
                 </Row>
                 <Input
-                    label="Nome"
+                    label="Nome de usuário*"
                     type="text"
                     placeholder="Entre com o seu nome"
-                    value={data.name}
+                    value={data.username}
                     onChange={(event) =>
-                        setData({ ...data, name: event.target.value })
+                        setData({ ...data, username: event.target.value })
                     }
                     maxLength={30}
                 />
                 <Input
-                    label="E-mail"
+                    label="E-mail*"
                     type="email"
                     placeholder="Entre com o seu e-mail"
                     value={data.email}
@@ -78,7 +176,7 @@ const Index = () => {
                     maxLength={30}
                 />
                 <Input
-                    label="Senha"
+                    label="Senha*"
                     type="password"
                     placeholder="Entre com uma senha"
                     value={data.password}
@@ -88,8 +186,8 @@ const Index = () => {
                     maxLength={30}
                 />
                 <Input
-                    label="Confirmar senha"
-                    type="text"
+                    label="Confirmar senha*"
+                    type="password"
                     placeholder="Confirme sua senha"
                     value={data.confirmPassword}
                     onChange={(event) =>
@@ -101,13 +199,7 @@ const Index = () => {
                     maxLength={30}
                 />
                 <ButtonsGrid>
-                    <Button
-                        onClick={() => {
-                            history.push("/register-school");
-                        }}
-                    >
-                        Confirmar
-                    </Button>
+                    <Button type="submit">Confirmar</Button>
                 </ButtonsGrid>
             </Form>
         </Container>

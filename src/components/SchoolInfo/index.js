@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from "react";
 import Styled from "styled-components";
 import { Row, Col } from "react-bootstrap";
-import { FaEdit } from "react-icons/fa";
+import { FaEdit, FaEye } from "react-icons/fa";
 
-import { File } from "../../components/Input";
+import Img from "../../components/Img";
+
+import Api from "../../services/api";
+
+import EmptyImage from "../../assets/images/empty.jpg";
 
 const Container = Styled.div`
     background-color: var(--purple-4);
@@ -91,7 +95,7 @@ const ContainerImg = Styled(Col)`
     padding-bottom: 1rem;
 `;
 
-const Index = ({ school, onClick }) => {
+const Index = ({ school, onClick, me }) => {
     const [data, setData] = useState(school);
 
     useEffect(() => {
@@ -103,12 +107,20 @@ const Index = ({ school, onClick }) => {
     return (
         <Container onClick={onClick}>
             <HoverContainer>
-                <FaEdit />
+                {me.role === 4 ? <FaEdit /> : <FaEye />}
             </HoverContainer>
 
             <Row>
                 <ContainerImg md="4" sm="12">
-                    <File src={data.image} width="200px" height="200px" />
+                    <Img
+                        src={
+                            !(Object.keys(data.image).length === 0)
+                                ? Api.defaults.baseURL + data.image.url
+                                : EmptyImage
+                        }
+                        width="200px"
+                        height="200px"
+                    />
                 </ContainerImg>
                 <Col md="4" sm="12">
                     <Field>
@@ -117,7 +129,9 @@ const Index = ({ school, onClick }) => {
                     </Field>
                     <Field>
                         <h3>Data de Fundação</h3>
-                        <span>{data.foundationDate}</span>
+                        <span>
+                            {new Date(data.foundationDate).toLocaleDateString()}
+                        </span>
                     </Field>
                 </Col>
                 <Col md="4" sm="12">
