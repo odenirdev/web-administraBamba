@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-    baseURL: "https://server.adsamba.tk",
+    baseURL: "https://localhost:1337",
     headers: {
         Authorization: localStorage.getItem("token"),
     },
