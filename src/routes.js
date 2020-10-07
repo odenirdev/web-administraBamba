@@ -22,7 +22,7 @@ const Authenticated = ({ component: Component, ...rest }) => (
                 <Component {...props} />
             ) : (
                 <Redirect
-                    to={{ patname: "/auth", state: { from: props.location } }}
+                    to={{ pathname: "/auth", state: { from: props.location } }}
                 />
             )
         }
