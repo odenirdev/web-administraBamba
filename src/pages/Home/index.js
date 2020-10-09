@@ -135,7 +135,6 @@ const Index = () => {
     useEffect(() => {
         async function authSchool() {
             const response = await Api.get("/schools/count");
-
             if (response.data === 0) {
                 if (me.role === 4) {
                     setStatusSchool(1);
