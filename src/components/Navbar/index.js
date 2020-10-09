@@ -11,7 +11,7 @@ import Button from "../../components/Button";
 
 import Profile from "../../modals/Profile";
 
-import Logo from "../../assets/images/Logo.png";
+import Logo from "../../assets/images/adsamba-logo.png";
 
 import Api from "../../services/api";
 import { Error } from "../../modules/notifications";
@@ -158,8 +158,7 @@ const Index = () => {
                     }}
                     className="cursor-pointer"
                 >
-                    <Img src={Logo} width="52px" height="52px" />
-                    <h1>AdministraBamba</h1>
+                    <Img src={Logo} width="120px" />
                 </Header>
                 <Section>
                     {
