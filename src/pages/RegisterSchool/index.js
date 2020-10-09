@@ -198,7 +198,7 @@ const Index = () => {
                 <h1>Cadastrar Escola de Samba</h1>
             </Header>
             <Form onSubmit={handleSubmit}>
-                <FormItem className="d-flex justify-content-center">
+                <div className="d-flex justify-content-center">
                     <File
                         width={200}
                         height={200}
@@ -221,7 +221,7 @@ const Index = () => {
                             });
                         }}
                     />
-                </FormItem>
+                </div>
                 <Row>
                     <FormItem md="4" sm="12">
                         <Input
