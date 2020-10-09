@@ -7,6 +7,8 @@ import { Input } from "../../components/Form";
 import Task from "../../components/Task";
 import Modal from "../../components/Modal";
 import Table from "../../components/TableAdmin";
+import Img from "../../components/Img";
+import Spinner, { Container as ContainerSpinner } from "../../components/SpinnerLoader";
 
 import TaskModal from "../../modals/Task";
 
@@ -14,6 +16,8 @@ import Api from "../../services/api";
 
 import SchoolFail from "../../pages/SchoolFail";
 import RegisterSchool from "../../pages/RegisterSchool";
+
+import ADSAMBAIcon from "../../assets/images/adsamba-logo.png";
 
 const Header = Styled.header.attrs({
     className: "row",
@@ -63,12 +67,23 @@ const Boards = Styled.div`
     width: 100%;
     display: flex;
     justify-content: space-between;
+
+    @media (max-width: 750px) {
+        flex-direction: column;
+    }
 `;
 
 const Board = Styled.div`
     background-color: var(--gray-5);
     border: 1px solid var(--color-primary);
-    width: 33%;
+    width: 24.8%;
+
+    @media (max-width: 750px) {
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+        margin-top: 1rem;
+    }
 
     & header {
         display: flex;
@@ -79,6 +94,7 @@ const Board = Styled.div`
 
         color: var(--gray-5);
         background-color: var(--color-primary);
+        width: 100%;
     }
 `;
 
@@ -107,6 +123,8 @@ const Index = () => {
     const [selectedTask, setSelectedTask] = useState([]);
 
     const [showTask, setShowTask] = useState(false);
+
+    const [overDue, setOverDue] = useState([]);
 
     const [tasks, setTasks] = useState([]);
 
@@ -184,7 +202,9 @@ const Index = () => {
     }, [allTasks, search]);
 
     useEffect(() => {
-        const tasks = filteredTasks.filter((task) => task.status === 1);
+        const tasks = filteredTasks.filter((task) => task.status === 1 && !isOverDue(task.dueDate));
+
+        const overDue = filteredTasks.filter((task) => (task.status === 1 && isOverDue(task.dueDate)));
 
         const doing = filteredTasks.filter((task) => task.status === 2);
 
@@ -193,14 +213,31 @@ const Index = () => {
         setTasks(tasks);
         setDoing(doing);
         setDone(done);
+        setOverDue(overDue);
     }, [filteredTasks]);
 
-    if (statusSchool === 1) {
-        return <RegisterSchool />;
+    function isOverDue(date) {
+        if (!date) {
+            return false;
+        }
+        const dueDate = new Date(new Date(date).toLocaleDateString()).getTime();
+        const today =  new Date(new Date().toLocaleDateString()).getTime()
+        return (dueDate < today);
+    }
+
+    if (!me && statusSchool === 0) {
+        return <ContainerSpinner>
+            <Img src={ADSAMBAIcon} width="360px"/>
+            <Spinner />
+        </ContainerSpinner>
     }
 
     if (statusSchool === 2) {
         return <SchoolFail />;
+    }
+
+    if (statusSchool === 1) {
+        return <RegisterSchool />;
     }
 
     return (
@@ -252,6 +289,21 @@ const Index = () => {
                     </Col>
                 </Header>
                 <Boards>
+                <Board>
+                        <header>Atrasados</header>
+                        <Dropzone>
+                            {overDue.map((task) => (
+                                <Task
+                                    key={task.id}
+                                    {...task}
+                                    onClick={() => {
+                                        setSelectedTask(task);
+                                        setShowTask(true);
+                                    }}
+                                />
+                            ))}
+                        </Dropzone>
+                    </Board>
                     <Board>
                         <header>Tarefas</header>
                         <Dropzone>

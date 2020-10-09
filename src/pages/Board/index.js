@@ -63,12 +63,23 @@ const Boards = Styled.div`
     width: 100%;
     display: flex;
     justify-content: space-between;
+
+    @media (max-width: 750px) {
+        flex-direction: column;
+    }
 `;
 
 const Board = Styled.div`
     background-color: var(--gray-5);
     border: 1px solid var(--color-primary);
-    width: 33%;
+    width: 24.8%;
+
+    @media (max-width: 750px) {
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+        margin-top: 1rem;
+    }
 
     & header {
         display: flex;
@@ -79,6 +90,7 @@ const Board = Styled.div`
 
         color: var(--gray-5);
         background-color: var(--color-primary);
+        width: 100%;
     }
 `;
 
@@ -86,6 +98,7 @@ const Dropzone = Styled.div.attrs({
     className: "dropzone",
 })`
     width: 100%;
+    min-height: 100px;
     max-height: 500px;
     overflow-y: auto;
 
@@ -114,6 +127,8 @@ const Index = (props) => {
     const [allTasks, setAllTasks] = useState([]);
 
     const [filteredTasks, setFilteredTasks] = useState([]);
+
+    const [overDue, setOverDue] = useState([]);
 
     const [tasks, setTasks] = useState([]);
 
@@ -158,7 +173,9 @@ const Index = (props) => {
     }, [indexTasks]);
 
     useEffect(() => {
-        const tasks = filteredTasks.filter((task) => task.status === 1);
+        const tasks = filteredTasks.filter((task) => task.status === 1 && !isOverDue(task.dueDate));
+
+        const overDue = filteredTasks.filter((task) => (task.status === 1 && isOverDue(task.dueDate)));
 
         const doing = filteredTasks.filter((task) => task.status === 2);
 
@@ -167,6 +184,7 @@ const Index = (props) => {
         setTasks(tasks);
         setDoing(doing);
         setDone(done);
+        setOverDue(overDue);
     }, [filteredTasks]);
 
     useEffect(() => {
@@ -186,6 +204,15 @@ const Index = (props) => {
             setFilteredTasks(allTasks);
         }
     }, [allTasks, search]);
+
+    function isOverDue(date) {
+        if (!date) {
+            return false;
+        }
+        const dueDate = new Date(new Date(date).toLocaleDateString()).getTime();
+        const today =  new Date(new Date().toLocaleDateString()).getTime()
+        return (dueDate < today);
+    }
 
     const indexBoard = useCallback(() => {
         async function show() {
@@ -273,6 +300,21 @@ const Index = (props) => {
                     </Col>
                 </Header>
                 <Boards>
+                <Board>
+                        <header>Atrasados</header>
+                        <Dropzone>
+                            {overDue.map((task) => (
+                                <Task
+                                    key={task.id}
+                                    {...task}
+                                    onClick={() => {
+                                        setSelectedTask(task);
+                                        setShowTask(true);
+                                    }}
+                                />
+                            ))}
+                        </Dropzone>
+                    </Board>
                     <Board>
                         <header>Tarefas</header>
                         <Dropzone>
