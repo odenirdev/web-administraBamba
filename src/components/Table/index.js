@@ -38,4 +38,9 @@ const Index = Styled.table`
     }
 `;
 
+export const ResponsiveTable = Styled.div`
+    width: 100%;
+    overflow-x: auto;
+`;
+
 export default Index;

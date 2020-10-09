@@ -5,12 +5,13 @@ import { Col } from "react-bootstrap";
 import { useHistory, Link } from "react-router-dom";
 
 import Passista from "../../assets/images/Passista.png";
-import LogoImg from "../../assets/images/Logo.png";
+import LogoImg from "../../assets/images/adsamba-logo.png";
 
 import Form, { GridButtons } from "../../components/Form";
 import Input from "../../components/Input";
 import Button from "../../components/Button";
 import Hr from "../../components/Hr";
+import Img from "../../components/Img";
 
 import Notification, { Error } from "../../modules/notifications";
 import Api from "../../services/api";
@@ -56,11 +57,6 @@ const Header = Styled.header`
     & img {
         margin-right: 14px;
     }
-`;
-
-const Logo = Styled.img`
-    width: 64px;
-    height: 64px;
 `;
 
 const StyledForm = Styled(Form)`
@@ -110,8 +106,7 @@ const Index = () => {
             <Container>
                 <Header>
                     <h1>
-                        <Logo src={LogoImg} />
-                        <span>AdministraBamba</span>
+                        <Img src={LogoImg} width="200px"/>
                     </h1>
                 </Header>
                 <StyledForm
