@@ -191,7 +191,7 @@ const Index = ({ school, indexSchool, me }) => {
     return (
         <Container>
             <Form onSubmit={handleSubmit}>
-                <FormItem className="d-flex justify-content-center mb-1">
+                <div className="d-flex justify-content-center mb-1">
                     {me.role === 4 ? (
                         <File
                             width={200}
@@ -245,7 +245,7 @@ const Index = ({ school, indexSchool, me }) => {
                             }
                         />
                     )}
-                </FormItem>
+                </div>
                 <Row>
                     <FormItem sm="12" md="6">
                         <Input
