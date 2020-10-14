@@ -10,9 +10,10 @@ import Api from "../../services/api";
 import EmptyImage from "../../assets/images/empty.jpg";
 
 const Container = Styled.div`
-    background-color: var(--purple-4);
+    background-color: var(--gray-5);
     margin: 1rem;
     padding: 1.5rem;
+    box-shadow: var(--shadow);
 
     border-radius: 2px;
     position: relative;
@@ -64,7 +65,7 @@ const Field = Styled.div`
     }
 
     & span {
-        color: var(--gray-5);
+        color: var(--gray-1);
         font-size: 1.3rem;
     }
 
@@ -83,7 +84,7 @@ const AddressField = Styled(Col)`
     }
 
     & span {
-        color: var(--gray-5);
+        color: var(--gray-1);
         font-size: 1.2rem;
     }
 `;
@@ -122,7 +123,7 @@ const Index = ({ school, onClick, me }) => {
                         height="200px"
                     />
                 </ContainerImg>
-                <Col md="4" sm="12">
+                <Col md="4" sm="12" className="p-0">
                     <Field>
                         <h3>Escola de Samba</h3>
                         <span>{data.name}</span>
@@ -134,7 +135,7 @@ const Index = ({ school, onClick, me }) => {
                         </span>
                     </Field>
                 </Col>
-                <Col md="4" sm="12">
+                <Col md="4" sm="12" className="p-0">
                     <Field>
                         <h3>Descrição</h3>
                         <span className="description">{data.description}</span>

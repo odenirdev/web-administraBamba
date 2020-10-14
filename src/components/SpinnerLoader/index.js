@@ -26,8 +26,7 @@ export const Container = Styled.div`
     width: 100%;
     height: 100%;
     position: absolute;
-    background-color: #000;
-    opacity: 40%;
+    background-color: var(--purple-6);
     display: flex;
     justify-content: center;
     align-items: center;

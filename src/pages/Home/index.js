@@ -26,6 +26,7 @@ const Header = Styled.header.attrs({
 
 const Information = Styled(Col)`
     position: relative;
+    padding: 1rem;
 
     & svg {
         position: absolute;
@@ -67,6 +68,8 @@ const Boards = Styled.div`
     width: 100%;
     display: flex;
     justify-content: space-between;
+    box-shadow: var(--shadow);
+    padding: 1rem;
 
     @media (max-width: 750px) {
         flex-direction: column;
@@ -74,7 +77,7 @@ const Boards = Styled.div`
 `;
 
 const Board = Styled.div`
-    background-color: var(--gray-5);
+    background-color: var(--gray-6);
     border: 1px solid var(--color-primary);
     width: 24.8%;
 
@@ -227,7 +230,7 @@ const Index = () => {
 
     if (!me && statusSchool === 0) {
         return <ContainerSpinner>
-            <Img src={ADSAMBAIcon} width="360px"/>
+            <Img src={ADSAMBAIcon} width="250px"/>
             <Spinner />
         </ContainerSpinner>
     }
@@ -274,8 +277,7 @@ const Index = () => {
                         <Description>
                             <h3>Descrição</h3>
                             <span>
-                                Todas as tarefas em que você contribui estão
-                                disposta aqui
+                                Lista das tarefas que você contribui
                             </span>
                         </Description>
                     </Information>

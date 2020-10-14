@@ -30,14 +30,13 @@ const Container = Styled.div`
     left: 0;
     width: 400px;
     height: 100vh;
-    background-color: var(--gray-3);
 
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
 
-    padding: 0 1rem;
+    padding: 0 3rem;
 
     @media (max-width: 750px) {
         width: 100%;

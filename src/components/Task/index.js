@@ -6,11 +6,14 @@ import { FaCalendarAlt, FaCalendarTimes } from "react-icons/fa";
 const Container = Styled(Col).attrs({
     className: "task",
 })`
-    background-color: var(--color-primary);
+    background-color: var(--gray-5);
     padding: 0.5rem;
-    color: var(--gray-5);
+    color: var(--gray-2);
     max-width: 90%;
     margin: 10px auto;
+
+    box-shadow: var(--shadow);
+
 
     border-radius: 3px;
 
@@ -19,10 +22,18 @@ const Container = Styled(Col).attrs({
     transition: 200ms;
 
     &:hover {
-        filter: brightness(120%);
+        background-color: var(--purple-5);
+    }
+
+    &:hover header {
+        background-color: var(--purple-5)!important;
     }
     
     & header {
+        transition: 200ms;
+        background-color: var(--gray-5)!important;
+        color: var(--gray-2)!important;
+
         display: flex;
         justify-content: flex-start!important;
     }

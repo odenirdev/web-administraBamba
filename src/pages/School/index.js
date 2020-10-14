@@ -15,6 +15,7 @@ import Api from "../../services/api";
 import { Error } from "../../modules/notifications";
 
 const UsersContainer = Styled.div`
+    padding: 1rem;
     margin-top: 0.5rem;
 `;
 

@@ -8,10 +8,11 @@ import { useHistory } from "react-router-dom";
 import User from "../../components/NavBarUser";
 import Modal from "../../components/Modal";
 import Button from "../../components/Button";
+import Img from "../../components/Img";
 
 import Profile from "../../modals/Profile";
 
-import Logo from "../../assets/images/adsamba-logo.png";
+import Logo from "../../assets/images/Logo.png";
 
 import Api from "../../services/api";
 import { Error } from "../../modules/notifications";
@@ -23,7 +24,6 @@ const Container = Styled.div`
     display: flex;
     justify-content: space-between;
 
-    background-color: var(--color-primary);
 
     filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));
 `;
@@ -52,9 +52,6 @@ const Header = Styled.header`
 
 const Section = Styled.section`
     display: flex;
-`;
-
-const Img = Styled.img`
 `;
 
 const UserGrid = Styled.div`
@@ -158,7 +155,7 @@ const Index = () => {
                     }}
                     className="cursor-pointer"
                 >
-                    <Img src={Logo} width="120px" />
+                    <Img src={Logo} width="5rem" />
                 </Header>
                 <Section>
                     {
