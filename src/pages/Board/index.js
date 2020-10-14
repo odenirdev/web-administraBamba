@@ -70,8 +70,9 @@ const Boards = Styled.div`
 `;
 
 const Board = Styled.div`
-    background-color: var(--gray-5);
+    background-color: var(--gray-6);
     border: 1px solid var(--color-primary);
+    box-shadow: var(--shadow);
     width: 24.8%;
 
     @media (max-width: 750px) {

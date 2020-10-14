@@ -14,7 +14,7 @@ const Button = Styled.button`
     justify-content: center;
     align-items: center;
 
-    background-color: var(--gray-5);
+    background-color: var(--gray-6);
     color: var(--color-primary);
     
     cursor: pointer;
@@ -45,7 +45,7 @@ const Container = Styled.div`
     min-width: 280px;
     height: fit-content;
 
-    margin: 1rem 0.5rem;
+    padding: 1rem;
     
     animation-name: animation;
     animation-duration: 200ms;
