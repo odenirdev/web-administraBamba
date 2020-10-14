@@ -5,8 +5,7 @@ import { FaEdit, FaTrash, FaPaperPlane } from "react-icons/fa";
 import Form, {
     Input,
     GridButtons,
-    Select,
-    FormItem,
+    Select
 } from "../../components/Form";
 import { File } from "../../components/Input";
 import Button from "../../components/Button";
@@ -161,7 +160,7 @@ const Index = ({ user, updateUsers, onClose }) => {
     return (
         <Container>
             <Form max-width="70%" sm-max-width="100%" onSubmit={handleSubmit}>
-                <FormItem className="d-flex justify-content-center mb-3">
+                <div className="d-flex justify-content-center mb-3">
                     {me.role === 4 ? (
                         <File
                             width={120}
@@ -212,7 +211,7 @@ const Index = ({ user, updateUsers, onClose }) => {
                             }
                         />
                     )}
-                </FormItem>
+                </div>
                 <Input
                     label="Nome de usuário*"
                     onChange={(event) => {
