@@ -42,6 +42,7 @@ const Container = Styled(Col).attrs({
             color: var(--gray-5)!important;
             font-size: 1.5rem;
             margin: 0 auto;
+            padding: 0 0.5rem;
 
             & svg {
                 margin-right: 1rem;

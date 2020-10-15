@@ -57,6 +57,7 @@ const Title = Styled.section`
     justify-content: center;
 
     border-radius: 5px 5px 0 0;
+    padding: 0 0.5rem;
 
     background-color: var(--color-primary);
     color: var(--gray-5);
