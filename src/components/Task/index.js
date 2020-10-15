@@ -32,7 +32,6 @@ const Container = Styled(Col).attrs({
     & header {
         transition: 200ms;
         background-color: var(--color-primary)!important;
-        color: var(--gray-5)!important;
 
         border-radius: 3px 3px 0 0;
 
@@ -40,6 +39,7 @@ const Container = Styled(Col).attrs({
         justify-content: flex-start!important;
 
         & h2 {
+            color: var(--gray-5)!important;
             font-size: 1.5rem;
             margin: 0 auto;
 
