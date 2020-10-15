@@ -50,33 +50,45 @@ const Contributor = Styled.div`
     }
 `;
 
-const Index = ({ board, me, onClose, index }) => {
+const Index = ({ board, onClose, index, createMeID = "" }) => {
     const history = useHistory();
 
     const [data, setData] = useState({ users: [] });
 
     const [users, setUsers] = useState([]);
 
-    const [meData, setMeData] = useState({});
+    const [me, setMe] = useState({});
 
     useEffect(() => {
-        if (meData !== me) {
-            setMeData(me);
+        async function showMe() {
+            try {
+                const response = await Api.get("/users/me");
+
+                try {
+                    setMe({ ...response.data, role: response.data.role.id });
+                } catch (err) {}
+            } catch (error) {
+                Error(error);
+            }
         }
-    }, [me, meData]);
+
+        showMe();
+    }, []);
 
     useEffect(() => {
         if (!(Object.keys(board).length === 0)) {
-            const usersContributing = board.users.map((user) => ({
-                value: user.id,
-                label: user.username,
-            }));
+            if (Array.isArray(board.users)) {
+                const usersContributing = board.users.map((user) => ({
+                    value: user.id,
+                    label: user.username,
+                }));
 
-            setData({
-                ...board,
-                users: usersContributing,
-                creator: board.creator.id,
-            });
+                setData({
+                    ...board,
+                    users: usersContributing,
+                    creator: board.creator.id,
+                });
+            }
         } else {
             setData(board);
         }
@@ -96,6 +108,10 @@ const Index = ({ board, me, onClose, index }) => {
                     const contributorsID = data.users.map((user) => user.value);
 
                     let filteredUsers = serializedUsers.filter((user) => {
+                        if (createMeID && createMeID === user.value) {
+                            return false;
+                        }
+
                         if (me.id === user.value) {
                             return false;
                         }
@@ -111,7 +127,7 @@ const Index = ({ board, me, onClose, index }) => {
         }
 
         indexUsers();
-    }, [data.users, me, meData]);
+    }, [data.users, me, board, createMeID]);
 
     const handleSelectContributing = useCallback(
         (user) => {
@@ -183,6 +199,10 @@ const Index = ({ board, me, onClose, index }) => {
             "Essa operação não pode ser desfeita, tem certeza ?",
             async () => {
                 try {
+                    data.tasks.map(async (task) => {
+                        await Api.delete(`/tasks/${task.id}`);
+                    });
+
                     await Api.delete(`/boards/${data.id}`);
                     Notification("success", "Quadro removido");
                     history.push("/boards");
@@ -229,7 +249,7 @@ const Index = ({ board, me, onClose, index }) => {
                     value={data.title || ""}
                 />
                 <TextArea
-                    label="Descrição"
+                    label="Descrição*"
                     onChange={(event) =>
                         setData({ ...data, description: event.target.value })
                     }
@@ -243,9 +263,9 @@ const Index = ({ board, me, onClose, index }) => {
                             {Array.isArray(data.users) && (
                                 <>
                                     {data.users.map((user) => (
-                                        <>
+                                        <div key={user.value}>
                                             {me.id !== user.value && (
-                                                <Contributor key={user.value}>
+                                                <Contributor>
                                                     <span>{user.label}</span>
                                                     <div
                                                         onClick={() => {
@@ -258,7 +278,7 @@ const Index = ({ board, me, onClose, index }) => {
                                                     </div>
                                                 </Contributor>
                                             )}
-                                        </>
+                                        </div>
                                     ))}
                                 </>
                             )}

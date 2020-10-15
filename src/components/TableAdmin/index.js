@@ -8,7 +8,7 @@ import Table from "../Table";
 import { Error } from "../../modules/notifications";
 import Api from "../../services/api";
 
-import {ResponsiveTable} from "../Table";
+import { ResponsiveTable } from "../Table";
 
 const Container = Styled.div`
     width: 80%;
@@ -35,7 +35,9 @@ const Index = () => {
 
                     const tasks = data.tasks.length;
 
-                    const  overDue = data.tasks.filter((task) => (task.status === 1 && isOverDue(task.dueDate))).length;
+                    const overDue = data.tasks.filter(
+                        (task) => task.status === 1 && isOverDue(task.dueDate)
+                    ).length;
 
                     let users = "";
                     for (const user of data.users) {
@@ -71,13 +73,12 @@ const Index = () => {
             return false;
         }
         const dueDate = new Date(new Date(date).toLocaleDateString()).getTime();
-        const today =  new Date(new Date().toLocaleDateString()).getTime()
-        return (dueDate < today);
+        const today = new Date(new Date().toLocaleDateString()).getTime();
+        return dueDate < today;
     }
 
     return (
         <Container>
-            <hr />
             <header>
                 <h1>Relatório de Quadros</h1>
             </header>

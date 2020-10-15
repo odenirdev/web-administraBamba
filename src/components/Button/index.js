@@ -15,12 +15,12 @@ const DefaultStyle = css`
 `;
 
 const SecundaryStyle = css`
-    background: ${(props) => props.background || "var(--gray-5)"};
+    background-color: ${(props) => props.background || "var(--gray-5)"};
     color: ${(props) => props.color || "var(--color-primary)"};
     border: 2px solid ${(props) => props.color || "var(--color-primary)"};
 
     &:hover {
-        background: ${(props) => props.color || "var(--color-primary)"};
+        background-color: ${(props) => props.color || "var(--color-primary)"};
         color: ${(props) => props.background || "var(--gray-5)"};
         border: 2px solid ${(props) => props.color || "var(--color-primary)"};
     }
@@ -57,6 +57,17 @@ const Index = Styled(Button)`
     }
 
     &:hover {
+        ${(props) => styles[props.variant || "default"]}
+        filter: brightness(110%);
+    }
+
+    &:disabled {
+        ${(props) => styles[props.variant || "default"]}
+        filter: brightness(50%);
+    }
+
+    &:active {
+        border: 0;
         ${(props) => styles[props.variant || "default"]}
         filter: brightness(110%);
     }

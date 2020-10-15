@@ -1,13 +1,17 @@
 import React from "react";
 import Styled from "styled-components";
 import { Col } from "react-bootstrap";
-import { FaCalendarAlt, FaCalendarTimes } from "react-icons/fa";
+import {
+    FaCalendarAlt,
+    FaCalendarTimes,
+    FaEdit,
+    FaTasks,
+} from "react-icons/fa";
 
 const Container = Styled(Col).attrs({
     className: "task",
 })`
     background-color: var(--gray-5);
-    padding: 0.5rem;
     color: var(--gray-2);
     max-width: 90%;
     margin: 10px auto;
@@ -21,27 +25,35 @@ const Container = Styled(Col).attrs({
 
     transition: 200ms;
 
-    &:hover {
-        background-color: var(--purple-5);
-    }
-
-    &:hover header {
-        background-color: var(--purple-5)!important;
+    &:hover .user-hover-container {
+        visibility: visible;
     }
     
     & header {
         transition: 200ms;
-        background-color: var(--gray-5)!important;
+        background-color: var(--purple-5)!important;
         color: var(--gray-2)!important;
+
+        border-radius: 3px 3px 0 0;
 
         display: flex;
         justify-content: flex-start!important;
+
+        & h2 {
+            font-size: 1.5rem;
+            margin: 0 auto;
+
+            & svg {
+                margin-right: 1rem;
+            }
+        }
     }
 
     & span {
         display: flex;
         align-items: center;
         font-size: 1.2rem;
+        padding: 0.5rem;
 
         & svg {
             margin-right: 5px;
@@ -67,11 +79,41 @@ const Container = Styled(Col).attrs({
 
 `;
 
+const HoverContainer = Styled.div.attrs({
+    className: "user-hover-container",
+})`
+    visibility: hidden;
+
+    width: 100%;
+    height: 100%;
+    background-color: rgba(26, 26, 26, 0.4);
+
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 99;
+    border-radius: 3px;
+
+    & svg {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        z-index: 100;        
+        color: var(--gray-5);
+    }
+`;
+
 const Index = ({ title, created_at, dueDate, onClick, id, status }) => {
     return (
         <Container onClick={onClick} data-id={id} data-status={status}>
+            <HoverContainer>
+                <FaEdit />
+            </HoverContainer>
             <header>
-                <span>{title}</span>
+                <h2>
+                    <FaTasks />
+                    {title}
+                </h2>
             </header>
             <div>
                 <span>
@@ -81,7 +123,7 @@ const Index = ({ title, created_at, dueDate, onClick, id, status }) => {
                 {dueDate && (
                     <span>
                         <FaCalendarTimes />
-                        {new Date(dueDate).toLocaleDateString()}
+                        {new Date(`${dueDate}T23:59:59`).toLocaleDateString()}
                     </span>
                 )}
             </div>

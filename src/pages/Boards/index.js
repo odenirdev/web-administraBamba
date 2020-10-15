@@ -2,10 +2,11 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useHistory } from "react-router-dom";
 import Styled from "styled-components";
 import { Row } from "react-bootstrap";
+import { FaClipboard } from "react-icons/fa";
 
 import Container from "../../components/Container";
 import AddButton from "../../components/AddButton";
-import Board from "../../components/Board";
+import Board from "../../components/BoardIcon";
 import { Input } from "../../components/Form";
 import Modal from "../../components/Modal";
 
@@ -136,7 +137,7 @@ const Index = () => {
                 >
                     <BoardModal
                         board={board}
-                        me={me}
+                        createMeID={me.id}
                         index={index}
                         onClose={() => {
                             setShow(false);
@@ -152,7 +153,7 @@ const Index = () => {
                         max-width="250px"
                         onChange={(event) => setSearch(event.target.value)}
                     />
-                    <AddButton onClick={handleAdd} />
+                    <AddButton onClick={handleAdd} Icon={FaClipboard} />
                 </Header>
                 <Section>
                     <Boards>
