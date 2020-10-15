@@ -17,7 +17,6 @@ import SchoolFail from "../../pages/SchoolFail";
 import RegisterSchool from "../../pages/RegisterSchool";
 
 import ADSAMBAIcon from "../../assets/images/adsamba-logo.png";
-import userEvent from "@testing-library/user-event";
 
 const Main = Styled.main`
     ul {
