@@ -15,7 +15,8 @@ const Grid = Styled(Col)`
 
 const Container = Styled(Col)`
     width: 100%;
-    background-color: var(--color-primary);
+    background-color: var(--gray-5);
+    box-shadow: var(--shadow);
 
     display: flex;
 
@@ -59,7 +60,7 @@ const Field = Styled(Col)`
     }
 
     & span {
-        color: var(--gray-5);
+        color: var(--gray-1);
         font-size: 1.2rem;
     }
 `;

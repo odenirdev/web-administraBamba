@@ -65,7 +65,7 @@ const Contributor = Styled.div`
     }
 `;
 
-const Index = ({ id, me, index, onClose, idBoard }) => {
+const Index = ({ id, index, onClose, idBoard }) => {
     const [data, setData] = useState({});
 
     const [users, setUsers] = useState([]);
@@ -73,6 +73,24 @@ const Index = ({ id, me, index, onClose, idBoard }) => {
     const [task, setTask] = useState({});
 
     const [board, setBoard] = useState({});
+
+    const [me, setMe] = useState({});
+
+    useEffect(() => {
+        async function showMe() {
+            try {
+                const response = await Api.get("/users/me");
+
+                try {
+                    setMe({ ...response.data, role: response.data.role.id });
+                } catch (err) {}
+            } catch (error) {
+                Error(error);
+            }
+        }
+
+        showMe();
+    }, []);
 
     useEffect(() => {
         async function show() {
@@ -223,6 +241,14 @@ const Index = ({ id, me, index, onClose, idBoard }) => {
         }
     }
 
+    function addDays(date, days) {
+        let result = new Date(new Date(date).setHours(1));
+        result = new Date(
+            result.setDate(result.getDate() + days)
+        ).toISOString();
+        return result;
+    }
+
     function handleSubmit(e) {
         e.preventDefault();
         if (!data.title) {
@@ -238,8 +264,10 @@ const Index = ({ id, me, index, onClose, idBoard }) => {
             requestData = { ...data, users: [] };
         }
 
-        if (requestData.dueDate === "false") {
+        if (!requestData.dueDate || requestData.dueDate === "false") {
             delete requestData.dueDate;
+        } else {
+            requestData.dueDate = addDays(requestData.dueDate, 2);
         }
 
         if (requestData.id) {

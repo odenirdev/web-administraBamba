@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import Styled from "styled-components";
+import { FaUser } from "react-icons/fa";
 
 import Container from "../../components/Container";
 import SchoolInfo from "../../components/SchoolInfo";
@@ -204,7 +205,9 @@ const Index = () => {
                             max-width="250px"
                             onChange={(event) => setSearch(event.target.value)}
                         />
-                        {me.role === 4 && <AddButton onClick={handleAddUser} />}
+                        {me.role === 4 && (
+                            <AddButton onClick={handleAddUser} Icon={FaUser} />
+                        )}
                     </Header>
 
                     {administrators.length !== 0 && (
