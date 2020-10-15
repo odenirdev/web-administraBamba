@@ -31,8 +31,8 @@ const Container = Styled(Col).attrs({
     
     & header {
         transition: 200ms;
-        background-color: var(--purple-5)!important;
-        color: var(--gray-2)!important;
+        background-color: var(--color-primary)!important;
+        color: var(--gray-5)!important;
 
         border-radius: 3px 3px 0 0;
 
