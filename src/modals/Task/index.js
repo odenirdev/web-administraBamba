@@ -267,7 +267,7 @@ const Index = ({ id, index, onClose, idBoard }) => {
         if (!requestData.dueDate || requestData.dueDate === "false") {
             delete requestData.dueDate;
         } else {
-            requestData.dueDate = addDays(requestData.dueDate, 2);
+            requestData.dueDate = addDays(requestData.dueDate, 1);
         }
 
         if (requestData.id) {
