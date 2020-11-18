@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import Styled from "styled-components";
 import { Row } from "react-bootstrap";
 import { FaEdit, FaSearch } from "react-icons/fa";
@@ -16,6 +16,7 @@ import Form, {
 import { File } from "../../components/Input";
 import Button from "../../components/Button";
 import Img from "../../components/Img";
+import AuthContext from "../../components/AuthContext";
 
 import Api from "../../services/api";
 import Confirm from "../../modules/alertConfirm";
@@ -38,8 +39,10 @@ const SearchButton = Styled(Button)`
     align-self: flex-end;
 `;
 
-const Index = ({ school, indexSchool, me }) => {
+const Index = ({ school, indexSchool }) => {
     const [data, setData] = useState(school);
+
+    const { me } = useContext(AuthContext);
 
     useEffect(() => {
         if (!(Object.keys(school.image).length === 0)) {
@@ -181,6 +184,21 @@ const Index = ({ school, indexSchool, me }) => {
             }
 
             await Api.put(`/schools/${resquestData.id}`, resquestData);
+
+            try {
+                await Api.post("/logs", {
+                    entity: 3,
+                    type: 1,
+                    data: resquestData,
+                    createdAt: new Date(),
+                    user: me.id,
+                });
+            } catch (error) {
+                await Api.put(`/schools/${resquestData.id}`, school);
+
+                return Error(error);
+            }
+
             Notification("success", "Escola de samba atualizada");
             indexSchool();
         } catch (error) {
@@ -188,11 +206,15 @@ const Index = ({ school, indexSchool, me }) => {
         }
     }
 
+    function isAdmin() {
+        return me.role && me.role.id === 4;
+    }
+
     return (
         <Container>
             <Form onSubmit={handleSubmit}>
                 <div className="d-flex justify-content-center mb-1">
-                    {me.role === 4 ? (
+                    {isAdmin() ? (
                         <File
                             width={200}
                             height={200}
@@ -256,7 +278,7 @@ const Index = ({ school, indexSchool, me }) => {
                                 setData({ ...data, name: event.target.value })
                             }
                             maxLength={30}
-                            readOnly={!(me.role === 4)}
+                            readOnly={!isAdmin()}
                         />
                     </FormItem>
                     <FormItem sm="12" md="6">
@@ -268,7 +290,7 @@ const Index = ({ school, indexSchool, me }) => {
                                 setData({ ...data, email: event.target.value })
                             }
                             maxLength={30}
-                            readOnly={!(me.role === 4)}
+                            readOnly={!isAdmin()}
                         />
                     </FormItem>
                 </Row>
@@ -284,7 +306,7 @@ const Index = ({ school, indexSchool, me }) => {
                             })
                         }
                         maxLength={280}
-                        readOnly={!(me.role === 4)}
+                        readOnly={!isAdmin()}
                     />
                 </FormItem>
                 <Row>
@@ -299,7 +321,7 @@ const Index = ({ school, indexSchool, me }) => {
                                     telephone: event.target.value,
                                 })
                             }
-                            readOnly={!(me.role === 4)}
+                            readOnly={!isAdmin()}
                         />
                     </FormItem>
                     <FormItem sm="12" md="4">
@@ -313,7 +335,7 @@ const Index = ({ school, indexSchool, me }) => {
                                     cellphone: event.target.value,
                                 })
                             }
-                            readOnly={!(me.role === 4)}
+                            readOnly={!isAdmin()}
                         />
                     </FormItem>
                     <FormItem className="d-flex" md="4" sm="12">
@@ -327,9 +349,9 @@ const Index = ({ school, indexSchool, me }) => {
                                     cep: event.target.value,
                                 })
                             }
-                            readOnly={!(me.role === 4)}
+                            readOnly={!isAdmin()}
                         />
-                        {me.role === 4 && (
+                        {isAdmin() && (
                             <SearchButton onClick={searchCEP}>
                                 <FaSearch />
                             </SearchButton>
@@ -347,7 +369,7 @@ const Index = ({ school, indexSchool, me }) => {
                                     state: event.target.value,
                                 })
                             }
-                            disabled={!(me.role === 4)}
+                            disabled={!isAdmin()}
                         >
                             <option value="">Selecione...</option>
                             {ufs.map((uf) => (
@@ -367,7 +389,7 @@ const Index = ({ school, indexSchool, me }) => {
                                     city: event.target.value,
                                 })
                             }
-                            disabled={!(me.role === 4)}
+                            disabled={!isAdmin()}
                         >
                             <option value="">Selecione...</option>
                             {cities.map((city) => (
@@ -389,7 +411,7 @@ const Index = ({ school, indexSchool, me }) => {
                                 })
                             }
                             maxLength={30}
-                            readOnly={!(me.role === 4)}
+                            readOnly={!isAdmin()}
                         />
                     </FormItem>
                 </Row>
@@ -406,7 +428,7 @@ const Index = ({ school, indexSchool, me }) => {
                                 })
                             }
                             maxLength={30}
-                            readOnly={!(me.role === 4)}
+                            readOnly={!isAdmin()}
                         />
                     </FormItem>
                     <FormItem sm="12" md="3">
@@ -420,7 +442,7 @@ const Index = ({ school, indexSchool, me }) => {
                                     number: event.target.value,
                                 })
                             }
-                            readOnly={!(me.role === 4)}
+                            readOnly={!isAdmin()}
                         />
                     </FormItem>
                     <FormItem sm="12" md="3">
@@ -435,11 +457,11 @@ const Index = ({ school, indexSchool, me }) => {
                                 })
                             }
                             maxLength={30}
-                            readOnly={!(me.role === 4)}
+                            readOnly={!isAdmin()}
                         />
                     </FormItem>
                 </Row>
-                {me.role === 4 && (
+                {isAdmin() && (
                     <GridButtons>
                         <Button type="submit">
                             <FaEdit />

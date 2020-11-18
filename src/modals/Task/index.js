@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useContext } from "react";
 import Styled from "styled-components";
 import { Row } from "react-bootstrap";
 
@@ -22,6 +22,7 @@ import {
 
 import Api from "../../services/api";
 import Notification, { Error } from "../../modules/notifications";
+import AuthContext from "../../components/AuthContext";
 
 const Container = Styled.div`
     display: flex;
@@ -65,57 +66,24 @@ const Contributor = Styled.div`
     }
 `;
 
-const Index = ({ id, index, onClose, idBoard }) => {
+const Index = ({ task, index, onClose, idBoard }) => {
     const [data, setData] = useState({});
 
     const [users, setUsers] = useState([]);
 
-    const [task, setTask] = useState({});
-
     const [board, setBoard] = useState({});
 
-    const [me, setMe] = useState({});
-
-    useEffect(() => {
-        async function showMe() {
-            try {
-                const response = await Api.get("/users/me");
-
-                try {
-                    setMe({ ...response.data, role: response.data.role.id });
-                } catch (err) {}
-            } catch (error) {
-                Error(error);
-            }
-        }
-
-        showMe();
-    }, []);
-
-    useEffect(() => {
-        async function show() {
-            try {
-                if (id) {
-                    const response = await Api.get(`/tasks/${id}`);
-
-                    setTask(response.data);
-                } else {
-                    setTask({});
-                }
-            } catch (error) {
-                Error(error);
-            }
-        }
-
-        show();
-    }, [id]);
+    const { me } = useContext(AuthContext);
 
     useEffect(() => {
         if (!(Object.keys(task).length === 0)) {
-            const usersContributing = task.users.map((user) => ({
-                value: user.id,
-                label: user.username,
-            }));
+            let usersContributing = [];
+            if (Array.isArray(task.users)) {
+                usersContributing = task.users.map((user) => ({
+                    value: user.id,
+                    label: user.username,
+                }));
+            }
 
             try {
                 setData({
@@ -204,11 +172,26 @@ const Index = ({ id, index, onClose, idBoard }) => {
 
     async function create(data) {
         try {
-            await Api.post("/tasks", {
+            const createData = {
                 ...data,
                 board: board.id,
                 creator: me.id,
-            });
+            };
+            const response = await Api.post("/tasks", createData);
+
+            try {
+                await Api.post("/logs", {
+                    entity: 2,
+                    type: 0,
+                    data: createData,
+                    createdAt: new Date(),
+                    user: me.id,
+                });
+            } catch (error) {
+                await Api.delete(`/tasks/${response.id}`);
+
+                return Error(error);
+            }
 
             index();
             onClose();
@@ -222,6 +205,20 @@ const Index = ({ id, index, onClose, idBoard }) => {
         try {
             await Api.put(`/tasks/${data.id}`, data);
 
+            try {
+                await Api.post("/logs", {
+                    entity: 2,
+                    type: 1,
+                    data: data,
+                    createdAt: new Date(),
+                    user: me.id,
+                });
+            } catch (error) {
+                await Api.put(`/tasks/${data.id}`, task);
+
+                return Error(error);
+            }
+
             index();
             Notification("success", "Tarefa atualizada");
         } catch (error) {
@@ -232,6 +229,20 @@ const Index = ({ id, index, onClose, idBoard }) => {
     async function destroy() {
         try {
             await Api.delete(`/tasks/${data.id}`);
+
+            try {
+                await Api.post("/logs", {
+                    entity: 2,
+                    type: 2,
+                    data: data,
+                    createdAt: new Date(),
+                    user: me.id,
+                });
+            } catch (error) {
+                await Api.post(`/tasks`, data);
+
+                return Error(error);
+            }
 
             index();
             onClose();
@@ -380,7 +391,8 @@ const Index = ({ id, index, onClose, idBoard }) => {
                         </Button>
                     ) : (
                         <>
-                            {(data.creator === me.id || me.role >= 3) && (
+                            {(data.creator === me.id ||
+                                (me.role && me.role.id >= 3)) && (
                                 <>
                                     <Button
                                         color="var(--red-1)"

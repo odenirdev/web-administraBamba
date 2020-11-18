@@ -1,15 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import Styled from "styled-components";
 import { FaEdit, FaTrash, FaPaperPlane } from "react-icons/fa";
 
-import Form, {
-    Input,
-    GridButtons,
-    Select
-} from "../../components/Form";
+import Form, { Input, GridButtons, Select } from "../../components/Form";
 import { File } from "../../components/Input";
 import Button from "../../components/Button";
 import Img from "../../components/Img";
+import AuthContext from "../../components/AuthContext";
 
 import Api from "../../services/api";
 import Notification, { Error } from "../../modules/notifications";
@@ -24,7 +21,8 @@ const Container = Styled.div`
 
 const Index = ({ user, updateUsers, onClose }) => {
     const [data, setData] = useState({ image: {} });
-    const [me, setMe] = useState({});
+
+    const { me } = useContext(AuthContext);
 
     useEffect(() => {
         try {
@@ -44,22 +42,6 @@ const Index = ({ user, updateUsers, onClose }) => {
             setData({ image: {}, role: "" });
         }
     }, [user]);
-
-    useEffect(() => {
-        async function showMe() {
-            try {
-                const response = await Api.get("/users/me");
-
-                try {
-                    setMe({ ...response.data, role: response.data.role.id });
-                } catch (err) {}
-            } catch (error) {
-                Error(error);
-            }
-        }
-
-        showMe();
-    }, []);
 
     function handleValidate() {
         if (!data.username) {
@@ -83,7 +65,21 @@ const Index = ({ user, updateUsers, onClose }) => {
 
     async function create(data) {
         try {
-            await Api.post(`/users/`, data);
+            const response = await Api.post(`/users/`, data);
+
+            try {
+                await Api.post("/logs", {
+                    entity: 0,
+                    type: 0,
+                    data,
+                    createdAt: new Date(),
+                    user: me.id,
+                });
+            } catch (error) {
+                await Api.delete(`/users/${response.id}`);
+
+                return Error(error);
+            }
 
             Notification("success", "Usuário cadastrado");
             updateUsers();
@@ -96,6 +92,20 @@ const Index = ({ user, updateUsers, onClose }) => {
     async function update(data) {
         try {
             await Api.put(`/users/${data.id}`, data);
+
+            try {
+                await Api.post("/logs", {
+                    entity: 0,
+                    type: 1,
+                    data,
+                    createdAt: new Date(),
+                    user: me.id,
+                });
+            } catch (error) {
+                await Api.put(`/users/${data.id}`, user);
+
+                return Error(error);
+            }
 
             Notification("success", "Usuário atualizado");
             updateUsers();
@@ -111,6 +121,20 @@ const Index = ({ user, updateUsers, onClose }) => {
             async () => {
                 try {
                     await Api.delete(`/users/${data.id}`);
+
+                    try {
+                        await Api.post("/logs", {
+                            entity: 0,
+                            type: 2,
+                            data,
+                            createdAt: new Date(),
+                            user: me.id,
+                        });
+                    } catch (error) {
+                        await Api.post(`/users/`, data);
+
+                        return Error(error);
+                    }
 
                     Notification("success", "Usuário removido");
                     updateUsers();
@@ -157,11 +181,15 @@ const Index = ({ user, updateUsers, onClose }) => {
         return create(resquestData);
     }
 
+    function isAdmin() {
+        return me.role && me.role.id === 4;
+    }
+
     return (
         <Container>
             <Form max-width="70%" sm-max-width="100%" onSubmit={handleSubmit}>
                 <div className="d-flex justify-content-center mb-3">
-                    {me.role === 4 ? (
+                    {isAdmin() ? (
                         <File
                             width={120}
                             height={120}
@@ -219,7 +247,7 @@ const Index = ({ user, updateUsers, onClose }) => {
                     }}
                     maxLength={30}
                     value={data.username || ""}
-                    readOnly={!(me.role === 4)}
+                    readOnly={!isAdmin}
                 />
                 <Input
                     label="E-Mail*"
@@ -228,7 +256,7 @@ const Index = ({ user, updateUsers, onClose }) => {
                     }}
                     maxLength={30}
                     value={data.email || ""}
-                    readOnly={!(me.role === 4)}
+                    readOnly={!isAdmin()}
                 />
                 <Select
                     label="Nível de Acesso*"
@@ -239,14 +267,14 @@ const Index = ({ user, updateUsers, onClose }) => {
                             role: parseInt(event.target.value),
                         });
                     }}
-                    disabled={!(me.role === 4)}
+                    disabled={!isAdmin()}
                 >
                     <option value="">Selecione...</option>
                     <option value="4">Administrador</option>
                     <option value="3">Diretoria</option>
                     <option value="1">Componente</option>
                 </Select>
-                {me.role === 4 && (
+                {isAdmin() && (
                     <GridButtons>
                         {Object.keys(user).length === 0 ? (
                             <Button type="submit">

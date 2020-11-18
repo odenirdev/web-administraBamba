@@ -216,7 +216,7 @@ function Index({ board = {}, me = {}, indexBoard, indexTasks }) {
                 }
             >
                 <TaskModal
-                    id={selectedTask.id}
+                    task={selectedTask}
                     idBoard={data.id}
                     index={indexTasks}
                     onClose={() => {

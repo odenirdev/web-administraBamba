@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import Styled from "styled-components";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import { Row } from "react-bootstrap";
@@ -7,6 +7,7 @@ import { useHistory } from "react-router-dom";
 import Form, { Input, GridButtons } from "../../components/Form";
 import Button from "../../components/Button";
 import { File } from "../../components/Input";
+import AuthContext from "../../components/AuthContext";
 
 import Api from "../../services/api";
 import Confirm from "../../modules/alertConfirm";
@@ -18,6 +19,8 @@ const Container = Styled.div`
 `;
 
 const Index = ({ user }) => {
+    const authContext = useContext(AuthContext);
+
     const [data, setData] = useState({});
 
     const history = useHistory();
@@ -101,7 +104,19 @@ const Index = ({ user }) => {
                 data.image = {};
             }
 
-            await Api.put(`/users/${user.id}`, data);
+            const response = await Api.put(`/users/${user.id}`, data);
+
+            try {
+                await Api.post("/logs", {
+                    entity: 0,
+                    type: 1,
+                    data: response.data,
+                    createdAt: new Date(),
+                    user: authContext.me.id,
+                });
+            } catch (error) {
+                return Error(error);
+            }
 
             Notification("success", "Conta atualizada");
         } catch (error) {
@@ -122,6 +137,20 @@ const Index = ({ user }) => {
                     }
 
                     await Api.delete(`/users/${data.id}`);
+
+                    try {
+                        await Api.post("/logs", {
+                            entity: 0,
+                            type: 2,
+                            data,
+                            createdAt: new Date(),
+                            user: authContext.me.id,
+                        });
+                    } catch (error) {
+                        await Api.post("/users", user);
+
+                        return Error(error);
+                    }
 
                     history.push("/auth");
                 } catch (error) {

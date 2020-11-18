@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useContext } from "react";
 import Styled from "styled-components";
 import { FaEdit, FaTrash, FaPaperPlane, FaTimes } from "react-icons/fa";
 import { Row } from "react-bootstrap";
@@ -12,6 +12,7 @@ import Form, {
 } from "../../components/Form";
 import Button from "../../components/Button";
 import Label from "../../components/Label";
+import AuthContext from "../../components/AuthContext";
 
 import Api from "../../services/api";
 import Notification, { Error } from "../../modules/notifications";
@@ -57,23 +58,7 @@ const Index = ({ board, onClose, index, createMeID = "" }) => {
 
     const [users, setUsers] = useState([]);
 
-    const [me, setMe] = useState({});
-
-    useEffect(() => {
-        async function showMe() {
-            try {
-                const response = await Api.get("/users/me");
-
-                try {
-                    setMe({ ...response.data, role: response.data.role.id });
-                } catch (err) {}
-            } catch (error) {
-                Error(error);
-            }
-        }
-
-        showMe();
-    }, []);
+    const { me } = useContext(AuthContext);
 
     useEffect(() => {
         if (!(Object.keys(board).length === 0)) {
@@ -172,8 +157,24 @@ const Index = ({ board, onClose, index, createMeID = "" }) => {
 
     async function create(data) {
         try {
-            await Api.post("/boards", { ...data, creator: me.id });
+            const response = await Api.post("/boards", {
+                ...data,
+                creator: me.id,
+            });
 
+            try {
+                await Api.post("/logs", {
+                    entity: 1,
+                    type: 0,
+                    data: response.data,
+                    createdAt: new Date(),
+                    user: me.id,
+                });
+            } catch (error) {
+                await Api.delete(`/boards/${response.data.id}`);
+
+                return Error(error);
+            }
             onClose();
             Notification("success", "Quadro cadastrado");
             index();
@@ -184,7 +185,21 @@ const Index = ({ board, onClose, index, createMeID = "" }) => {
 
     async function update(data) {
         try {
-            await Api.put(`/boards/${data.id}`, data);
+            const response = await Api.put(`/boards/${data.id}`, data);
+
+            try {
+                await Api.post("/logs", {
+                    entity: 1,
+                    type: 1,
+                    data: response.data,
+                    createdAt: new Date(),
+                    user: me.id,
+                });
+            } catch (error) {
+                await Api.put(`/boards/${data.id}`, board);
+
+                return Error(error);
+            }
 
             Notification("success", "Quadro atualizado");
             index();
@@ -204,6 +219,24 @@ const Index = ({ board, onClose, index, createMeID = "" }) => {
                     });
 
                     await Api.delete(`/boards/${data.id}`);
+
+                    try {
+                        await Api.post("/logs", {
+                            entity: 1,
+                            type: 2,
+                            data: data,
+                            createdAt: new Date(),
+                            user: me.id,
+                        });
+                    } catch (error) {
+                        data.tasks.map(async (task) => {
+                            await Api.post(`/tasks`, task);
+                        });
+
+                        await Api.post(`/boards/`, data);
+                        return Error(error);
+                    }
+
                     Notification("success", "Quadro removido");
                     history.push("/boards");
                 } catch (error) {
@@ -256,7 +289,7 @@ const Index = ({ board, onClose, index, createMeID = "" }) => {
                     maxLength={280}
                     value={data.description || ""}
                 />
-                {me.role >= 3 && (
+                {me.role && me.role.id >= 3 && (
                     <Label>
                         Contribuidores
                         <Row>
@@ -299,7 +332,8 @@ const Index = ({ board, onClose, index, createMeID = "" }) => {
                         </Button>
                     ) : (
                         <>
-                            {(data.creator === me.id || me.role >= 3) && (
+                            {(data.creator === me.id ||
+                                (me.role && me.role.id >= 3)) && (
                                 <>
                                     <Button
                                         color="var(--red-1)"

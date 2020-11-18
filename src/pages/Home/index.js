@@ -10,6 +10,7 @@ import Spinner, {
 import Board from "../../components/Board";
 import Button from "../../components/Button";
 import TableAdmin from "../../components/TableAdmin";
+import Historic from "../../components/Historic";
 
 import Api from "../../services/api";
 
@@ -128,7 +129,6 @@ const Index = () => {
 
     return (
         <Container>
-            {console.log(me)}
             <Main>
                 {me.role === 4 && (
                     <nav className="d-flex mb-2 row" id="nav-buttons">
