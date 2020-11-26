@@ -23,6 +23,7 @@ import Confirm from "../../modules/alertConfirm";
 import Notification, { Error } from "../../modules/notifications";
 
 import EmptyImage from "../../assets/images/empty.jpg";
+import System from "../../modules/system";
 
 const Container = Styled.div`
     display: flex;
@@ -206,15 +207,11 @@ const Index = ({ school, indexSchool }) => {
         }
     }
 
-    function isAdmin() {
-        return me.role && me.role.id === 4;
-    }
-
     return (
         <Container>
             <Form onSubmit={handleSubmit}>
                 <div className="d-flex justify-content-center mb-1">
-                    {isAdmin() ? (
+                    {System.isAdmin() ? (
                         <File
                             width={200}
                             height={200}
@@ -278,7 +275,7 @@ const Index = ({ school, indexSchool }) => {
                                 setData({ ...data, name: event.target.value })
                             }
                             maxLength={30}
-                            readOnly={!isAdmin()}
+                            readOnly={!System.isAdmin()}
                         />
                     </FormItem>
                     <FormItem sm="12" md="6">
@@ -290,7 +287,7 @@ const Index = ({ school, indexSchool }) => {
                                 setData({ ...data, email: event.target.value })
                             }
                             maxLength={30}
-                            readOnly={!isAdmin()}
+                            readOnly={!System.isAdmin()}
                         />
                     </FormItem>
                 </Row>
@@ -306,7 +303,7 @@ const Index = ({ school, indexSchool }) => {
                             })
                         }
                         maxLength={280}
-                        readOnly={!isAdmin()}
+                        readOnly={!System.isAdmin()}
                     />
                 </FormItem>
                 <Row>
@@ -321,7 +318,7 @@ const Index = ({ school, indexSchool }) => {
                                     telephone: event.target.value,
                                 })
                             }
-                            readOnly={!isAdmin()}
+                            readOnly={!System.isAdmin()}
                         />
                     </FormItem>
                     <FormItem sm="12" md="4">
@@ -335,7 +332,7 @@ const Index = ({ school, indexSchool }) => {
                                     cellphone: event.target.value,
                                 })
                             }
-                            readOnly={!isAdmin()}
+                            readOnly={!System.isAdmin()}
                         />
                     </FormItem>
                     <FormItem className="d-flex" md="4" sm="12">
@@ -349,9 +346,9 @@ const Index = ({ school, indexSchool }) => {
                                     cep: event.target.value,
                                 })
                             }
-                            readOnly={!isAdmin()}
+                            readOnly={!System.isAdmin()}
                         />
-                        {isAdmin() && (
+                        {System.isAdmin() && (
                             <SearchButton onClick={searchCEP}>
                                 <FaSearch />
                             </SearchButton>
@@ -369,7 +366,7 @@ const Index = ({ school, indexSchool }) => {
                                     state: event.target.value,
                                 })
                             }
-                            disabled={!isAdmin()}
+                            disabled={!System.isAdmin()}
                         >
                             <option value="">Selecione...</option>
                             {ufs.map((uf) => (
@@ -389,7 +386,7 @@ const Index = ({ school, indexSchool }) => {
                                     city: event.target.value,
                                 })
                             }
-                            disabled={!isAdmin()}
+                            disabled={!System.isAdmin()}
                         >
                             <option value="">Selecione...</option>
                             {cities.map((city) => (
@@ -411,7 +408,7 @@ const Index = ({ school, indexSchool }) => {
                                 })
                             }
                             maxLength={30}
-                            readOnly={!isAdmin()}
+                            readOnly={!System.isAdmin()}
                         />
                     </FormItem>
                 </Row>
@@ -428,7 +425,7 @@ const Index = ({ school, indexSchool }) => {
                                 })
                             }
                             maxLength={30}
-                            readOnly={!isAdmin()}
+                            readOnly={!System.isAdmin()}
                         />
                     </FormItem>
                     <FormItem sm="12" md="3">
@@ -442,7 +439,7 @@ const Index = ({ school, indexSchool }) => {
                                     number: event.target.value,
                                 })
                             }
-                            readOnly={!isAdmin()}
+                            readOnly={!System.isAdmin()}
                         />
                     </FormItem>
                     <FormItem sm="12" md="3">
@@ -457,11 +454,11 @@ const Index = ({ school, indexSchool }) => {
                                 })
                             }
                             maxLength={30}
-                            readOnly={!isAdmin()}
+                            readOnly={!System.isAdmin()}
                         />
                     </FormItem>
                 </Row>
-                {isAdmin() && (
+                {System.isAdmin() && (
                     <GridButtons>
                         <Button type="submit">
                             <FaEdit />

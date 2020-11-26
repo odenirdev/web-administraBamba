@@ -8,12 +8,14 @@ import { Input } from "../../components/Form";
 import AddButton from "../../components/AddButton";
 import User from "../../components/User";
 import Modal from "../../components/Modal";
+import SpinnerLoader from "../../components/SpinnerLoader";
 
 import SchoolModal from "../../modals/School";
 import UserModal from "../../modals/User";
 
 import Api from "../../services/api";
 import { Error } from "../../modules/notifications";
+import System from "../../modules/system";
 
 const UsersContainer = Styled.div`
     padding: 1rem;
@@ -56,8 +58,6 @@ const Index = () => {
     const [managers, setManagers] = useState([]);
 
     const [components, setComponents] = useState([]);
-
-    const [me, setMe] = useState([]);
 
     const indexUsers = useCallback(() => {
         async function index() {
@@ -131,22 +131,6 @@ const Index = () => {
         }
     }, [search, users]);
 
-    useEffect(() => {
-        async function showMe() {
-            try {
-                const response = await Api.get("/users/me");
-
-                try {
-                    setMe({ ...response.data, role: response.data.role.id });
-                } catch (err) {}
-            } catch (error) {
-                Error(error);
-            }
-        }
-
-        showMe();
-    }, []);
-
     const handleAddUser = () => {
         setSelectedUser({});
         setShowUser(true);
@@ -157,6 +141,10 @@ const Index = () => {
         setShowUser(true);
     };
 
+    if (JSON.stringify(school) === JSON.stringify({ image: {} })) {
+        return <SpinnerLoader />;
+    }
+
     return (
         <>
             <Modal
@@ -164,11 +152,7 @@ const Index = () => {
                 title="Minha Escola"
                 onClose={() => setShowSchool(false)}
             >
-                <SchoolModal
-                    school={school}
-                    indexSchool={indexSchool}
-                    me={me}
-                />
+                <SchoolModal school={school} indexSchool={indexSchool} />
             </Modal>
             <Modal
                 show={showUser}
@@ -195,7 +179,6 @@ const Index = () => {
                 <SchoolInfo
                     school={school}
                     onClick={() => setShowSchool(true)}
-                    me={me}
                 />
                 <UsersContainer>
                     <Header>
@@ -205,7 +188,7 @@ const Index = () => {
                             max-width="250px"
                             onChange={(event) => setSearch(event.target.value)}
                         />
-                        {me.role === 4 && (
+                        {System.isAdmin() && (
                             <AddButton onClick={handleAddUser} Icon={FaUser} />
                         )}
                     </Header>
@@ -215,7 +198,7 @@ const Index = () => {
                             <h2>Administradores</h2>
                             {administrators.map((user) => (
                                 <User
-                                    meRole={me.role}
+                                    meRole={true}
                                     key={user.id}
                                     user={user}
                                     onClick={() => {
@@ -230,7 +213,7 @@ const Index = () => {
                             <h2>Diretoria</h2>
                             {managers.map((user) => (
                                 <User
-                                    meRole={me.role}
+                                    meRole={true}
                                     key={user.id}
                                     user={user}
                                     onClick={() => {
@@ -246,7 +229,7 @@ const Index = () => {
                             <h2>Componentes</h2>
                             {components.map((user) => (
                                 <User
-                                    meRole={me.role}
+                                    meRole={true}
                                     key={user.id}
                                     user={user}
                                     onClick={() => {

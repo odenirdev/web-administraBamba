@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useContext } from "react";
 import { useHistory } from "react-router-dom";
 import Styled from "styled-components";
 import { Row } from "react-bootstrap";
@@ -9,6 +9,8 @@ import AddButton from "../../components/AddButton";
 import Board from "../../components/BoardIcon";
 import { Input } from "../../components/Form";
 import Modal from "../../components/Modal";
+
+import AuthContext from "../../components/AuthContext";
 
 import BoardModal from "../../modals/Board";
 
@@ -37,11 +39,7 @@ const Index = () => {
 
     const [search, setSearch] = useState("");
 
-    const [me, setMe] = useState({});
-
     const [show, setShow] = useState(false);
-
-    const [board, setBoard] = useState({});
 
     const [title, setTitle] = useState("Novo Quadro");
 
@@ -55,21 +53,9 @@ const Index = () => {
         []
     );
 
-    useEffect(() => {
-        async function showMe() {
-            try {
-                const response = await Api.get("/users/me");
-
-                try {
-                    setMe({ ...response.data, role: response.data.role.id });
-                } catch (err) {}
-            } catch (error) {
-                Error(error);
-            }
-        }
-
-        showMe();
-    }, []);
+    const {
+        auth: { me },
+    } = useContext(AuthContext);
 
     const index = useCallback(() => {
         async function index() {
@@ -121,7 +107,6 @@ const Index = () => {
 
     const handleAdd = () => {
         setTitle("Novo Quadro");
-        setBoard({});
         setShow(true);
     };
 
@@ -136,8 +121,6 @@ const Index = () => {
                     }}
                 >
                     <BoardModal
-                        board={board}
-                        createMeID={me.id}
                         index={index}
                         onClose={() => {
                             setShow(false);

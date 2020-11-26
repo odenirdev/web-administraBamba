@@ -44,15 +44,17 @@ const CaractersGrid = Styled.div`
 `;
 
 export const Input = (props) => {
-    const [length, setLength] = useState(props.value.length || 0);
+    const [length, setLength] = useState(
+        props.value && (props.value.length || 0)
+    );
 
     const onChange = props.onChange || (() => {});
 
     useEffect(() => {
-        if (length !== props.value.length) {
+        if (props.value && length !== props.value.length) {
             setLength(props.value.length);
         }
-    }, [length, props.value.length]);
+    }, [length, props.value]);
 
     return (
         <StyledLabel>
@@ -102,15 +104,17 @@ export const ReactSelect = (props) => {
 };
 
 export const TextArea = (props) => {
-    const [length, setLength] = useState(props.value.length || 0);
+    const [length, setLength] = useState(
+        props.value && (props.value.length || 0)
+    );
 
     const onChange = props.onChange;
 
     useEffect(() => {
-        if (length !== props.value.length) {
+        if (props.value && length !== props.value.length) {
             setLength(props.value.length);
         }
-    }, [length, props.value.length]);
+    }, [length, props.value]);
 
     return (
         <StyledLabel>

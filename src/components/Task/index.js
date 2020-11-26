@@ -1,130 +1,98 @@
-import React from "react";
-import Styled from "styled-components";
-import { Col } from "react-bootstrap";
-import {
-    FaCalendarAlt,
-    FaCalendarTimes,
-    FaEdit,
-    FaTasks,
-} from "react-icons/fa";
+import React, { useRef, useContext } from "react";
+import { useDrag, useDrop } from "react-dnd";
+import { FaCalendarAlt, FaCalendarTimes, FaTasks } from "react-icons/fa";
 
-const Container = Styled(Col).attrs({
-    className: "task",
-})`
-    background-color: var(--gray-5);
-    color: var(--gray-2);
-    max-width: 90%;
-    margin: 10px auto;
+import BoardContext from "../Board/context";
 
-    box-shadow: var(--shadow);
+import { Container } from "./styles";
 
+const Index = ({ data, index, indexList, onClick }) => {
+    const ref = useRef();
 
-    border-radius: 3px;
+    const { move } = useContext(BoardContext);
 
-    cursor: pointer;
+    const [{ isDragging }, dragRef] = useDrag({
+        item: {
+            id: data.id,
+            type: "TASK",
+            index,
+            indexList,
+        },
+        collect: (monitor) => ({
+            isDragging: monitor.isDragging(),
+        }),
+    });
 
-    transition: 200ms;
+    const [, dropRef] = useDrop({
+        accept: "TASK",
+        hover(item, monitor) {
+            const draggedListIndex = item.indexList;
+            const targetListIndex = indexList;
 
-    &:hover .user-hover-container {
-        visibility: visible;
-    }
-    
-    & header {
-        transition: 200ms;
-        background-color: var(--color-primary)!important;
+            const draggedIndex = item.index;
+            const targetIndex = index;
 
-        border-radius: 3px 3px 0 0;
-
-        display: flex;
-        justify-content: flex-start!important;
-
-        & h2 {
-            color: var(--gray-5)!important;
-            font-size: 1.5rem;
-            margin: 0 auto;
-            padding: 0 0.5rem;
-
-            & svg {
-                margin-right: 1rem;
+            if (
+                draggedIndex === targetIndex &&
+                draggedListIndex === targetListIndex
+            ) {
+                return;
             }
+
+            const targetSize = ref.current.getBoundingClientRect();
+            const targetCenter = (targetSize.bottom - targetSize.top) / 2;
+
+            const draggedOffset = monitor.getClientOffset();
+            const draggedTop = draggedOffset.y - targetSize.top;
+
+            if (draggedIndex < targetIndex && draggedTop < targetCenter) {
+                return;
+            }
+
+            if (draggedIndex > targetIndex && draggedTop > targetCenter) {
+                return;
+            }
+
+            move(draggedListIndex, targetListIndex, draggedIndex, targetIndex);
+
+            item.index = targetIndex;
+            item.indexList = targetListIndex;
+        },
+    });
+
+    function renderClick() {
+        if (
+            /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+                navigator.userAgent
+            )
+        ) {
+            return { onClick: onClick };
         }
+
+        return { onDoubleClick: onClick };
     }
 
-    & span {
-        display: flex;
-        align-items: center;
-        font-size: 1.2rem;
-        padding: 0.5rem;
+    dragRef(dropRef(ref));
 
-        & svg {
-            margin-right: 5px;
-        }
-    } 
-
-    & div {
-        display: flex;
-        justify-content: space-between;
-    }
-
-    @media (max-width: 750px) {
-        & div {
-            flex-direction: column;
-            align-items: center;
-        }
-
-        & header {
-            text-align: center;
-
-        }
-    }
-
-`;
-
-const HoverContainer = Styled.div.attrs({
-    className: "user-hover-container",
-})`
-    visibility: hidden;
-
-    width: 100%;
-    height: 100%;
-    background-color: rgba(26, 26, 26, 0.4);
-
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 99;
-    border-radius: 3px;
-
-    & svg {
-        position: absolute;
-        top: 5px;
-        right: 5px;
-        z-index: 100;        
-        color: var(--gray-5);
-    }
-`;
-
-const Index = ({ title, created_at, dueDate, onClick, id, status }) => {
     return (
-        <Container onClick={onClick} data-id={id} data-status={status}>
-            <HoverContainer>
-                <FaEdit />
-            </HoverContainer>
+        <Container ref={ref} isDragging={isDragging} {...renderClick()}>
             <header>
                 <h2>
                     <FaTasks />
-                    {title}
+                    {data.title}
                 </h2>
             </header>
             <div>
                 <span>
                     <FaCalendarAlt />
-                    {new Date(created_at).toLocaleDateString()}
+                    {new Date(data.created_at).toLocaleDateString()}
                 </span>
-                {dueDate && (
+                {data.dueDate && (
                     <span>
                         <FaCalendarTimes />
-                        {new Date(`${dueDate}T23:59:59`).toLocaleDateString()}
+                        {new Date(
+                            `${data.dueDate}T23:59:59`
+                        ).toLocaleDateString()}
                     </span>
                 )}
             </div>

@@ -107,9 +107,7 @@ const Index = ({ school, onClick, me }) => {
 
     return (
         <Container onClick={onClick}>
-            <HoverContainer>
-                {me.role === 4 ? <FaEdit /> : <FaEye />}
-            </HoverContainer>
+            <HoverContainer>{true ? <FaEdit /> : <FaEye />}</HoverContainer>
 
             <Row>
                 <ContainerImg md="4" sm="12">

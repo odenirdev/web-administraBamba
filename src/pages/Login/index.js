@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import Styled from "styled-components";
 import { FaSignInAlt } from "react-icons/fa";
 import { Col } from "react-bootstrap";
@@ -12,6 +12,8 @@ import Input from "../../components/Input";
 import Button from "../../components/Button";
 import Hr from "../../components/Hr";
 import Img from "../../components/Img";
+
+import AuthContext from "../../components/AuthContext";
 
 import Notification, { Error } from "../../modules/notifications";
 import Api from "../../services/api";
@@ -70,6 +72,8 @@ const Index = () => {
     const [identifier, setIdentifier] = useState("");
     const [password, setPassword] = useState("");
 
+    const { setAuth } = useContext(AuthContext);
+
     useEffect(() => {
         localStorage.clear();
     }, []);
@@ -92,7 +96,10 @@ const Index = () => {
             );
 
             localStorage.setItem("token", `Bearer ${response.data.jwt}`);
+
             Api.defaults.headers.Authorization = `Bearer ${response.data.jwt}`;
+
+            setAuth({ isAuthenticated: true, me: response.data.user });
 
             history.push("/");
         } catch (error) {
@@ -105,7 +112,7 @@ const Index = () => {
             <Container>
                 <Header>
                     <h1>
-                        <Img src={LogoImg} width="200px"/>
+                        <Img src={LogoImg} width="200px" />
                     </h1>
                 </Header>
                 <StyledForm

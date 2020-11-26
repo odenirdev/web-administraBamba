@@ -12,7 +12,9 @@ import Form, {
 } from "../../components/Form";
 import Button from "../../components/Button";
 import Label from "../../components/Label";
+
 import AuthContext from "../../components/AuthContext";
+import BoardContext from "../../components/Board/context";
 
 import Api from "../../services/api";
 import Notification, { Error } from "../../modules/notifications";
@@ -51,17 +53,21 @@ const Contributor = Styled.div`
     }
 `;
 
-const Index = ({ board, onClose, index, createMeID = "" }) => {
+const Index = ({ onClose, index: indexBoards }) => {
     const history = useHistory();
 
     const [data, setData] = useState({ users: [] });
 
     const [users, setUsers] = useState([]);
 
-    const { me } = useContext(AuthContext);
+    const { data: board, index } = useContext(BoardContext);
+
+    const {
+        auth: { me },
+    } = useContext(AuthContext);
 
     useEffect(() => {
-        if (!(Object.keys(board).length === 0)) {
+        if (board) {
             if (Array.isArray(board.users)) {
                 const usersContributing = board.users.map((user) => ({
                     value: user.id,
@@ -89,14 +95,10 @@ const Index = ({ board, onClose, index, createMeID = "" }) => {
                     label: user.username,
                 }));
 
-                if (Array.isArray(data.users)) {
+                if (data && Array.isArray(data.users)) {
                     const contributorsID = data.users.map((user) => user.value);
 
                     let filteredUsers = serializedUsers.filter((user) => {
-                        if (createMeID && createMeID === user.value) {
-                            return false;
-                        }
-
                         if (me.id === user.value) {
                             return false;
                         }
@@ -112,7 +114,7 @@ const Index = ({ board, onClose, index, createMeID = "" }) => {
         }
 
         indexUsers();
-    }, [data.users, me, board, createMeID]);
+    }, [board, data, me]);
 
     const handleSelectContributing = useCallback(
         (user) => {
@@ -175,9 +177,10 @@ const Index = ({ board, onClose, index, createMeID = "" }) => {
 
                 return Error(error);
             }
+
+            indexBoards();
             onClose();
             Notification("success", "Quadro cadastrado");
-            index();
         } catch (error) {
             Error(error);
         }
@@ -201,8 +204,9 @@ const Index = ({ board, onClose, index, createMeID = "" }) => {
                 return Error(error);
             }
 
-            Notification("success", "Quadro atualizado");
             index();
+            onClose();
+            Notification("success", "Quadro atualizado");
         } catch (error) {
             Error(error);
         }
@@ -214,8 +218,10 @@ const Index = ({ board, onClose, index, createMeID = "" }) => {
             "Essa operação não pode ser desfeita, tem certeza ?",
             async () => {
                 try {
-                    data.tasks.map(async (task) => {
-                        await Api.delete(`/tasks/${task.id}`);
+                    data.lists.forEach((list) => {
+                        list.tasks.map(async (task) => {
+                            await Api.delete(`/tasks/${task.id}`);
+                        });
                     });
 
                     await Api.delete(`/boards/${data.id}`);
@@ -279,7 +285,7 @@ const Index = ({ board, onClose, index, createMeID = "" }) => {
                         setData({ ...data, title: event.target.value })
                     }
                     maxLength={30}
-                    value={data.title || ""}
+                    value={data && (data.title || "")}
                 />
                 <TextArea
                     label="Descrição*"
@@ -287,13 +293,13 @@ const Index = ({ board, onClose, index, createMeID = "" }) => {
                         setData({ ...data, description: event.target.value })
                     }
                     maxLength={280}
-                    value={data.description || ""}
+                    value={data && (data.description || "")}
                 />
                 {me.role && me.role.id >= 3 && (
                     <Label>
                         Contribuidores
                         <Row>
-                            {Array.isArray(data.users) && (
+                            {data && Array.isArray(data.users) && (
                                 <>
                                     {data.users.map((user) => (
                                         <div key={user.value}>
@@ -325,14 +331,14 @@ const Index = ({ board, onClose, index, createMeID = "" }) => {
                     </Label>
                 )}
                 <GridButtons>
-                    {Object.keys(board).length === 0 ? (
+                    {!board ? (
                         <Button type="submit">
                             <FaPaperPlane />
                             Confirmar
                         </Button>
                     ) : (
                         <>
-                            {(data.creator === me.id ||
+                            {((data && data.creator === me.id) ||
                                 (me.role && me.role.id >= 3)) && (
                                 <>
                                     <Button

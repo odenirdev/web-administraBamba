@@ -75,7 +75,7 @@ const Description = Styled.section`
 `;
 
 const Index = ({ title, description, onClick }) => (
-    <Grid md="6">
+    <Grid md="4">
         <Container onClick={onClick}>
             <HoverContainer>
                 <FaEdit />

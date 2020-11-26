@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback, useContext } from "react";
 import Styled from "styled-components";
 import { Row } from "react-bootstrap";
+import { Switch } from "react-og-forms";
 
 import Form, {
     Input,
@@ -22,7 +23,9 @@ import {
 
 import Api from "../../services/api";
 import Notification, { Error } from "../../modules/notifications";
+
 import AuthContext from "../../components/AuthContext";
+import BoardContext from "../../components/Board/context";
 
 const Container = Styled.div`
     display: flex;
@@ -66,14 +69,20 @@ const Contributor = Styled.div`
     }
 `;
 
-const Index = ({ task, index, onClose, idBoard }) => {
+const Index = ({ task, index, onClose }) => {
     const [data, setData] = useState({});
 
     const [users, setUsers] = useState([]);
 
     const [board, setBoard] = useState({});
 
-    const { me } = useContext(AuthContext);
+    const {
+        auth: { me },
+    } = useContext(AuthContext);
+    const {
+        data: { lists, id: idBoard },
+        index: indexBoard,
+    } = useContext(BoardContext);
 
     useEffect(() => {
         if (!(Object.keys(task).length === 0)) {
@@ -174,9 +183,12 @@ const Index = ({ task, index, onClose, idBoard }) => {
         try {
             const createData = {
                 ...data,
-                board: board.id,
+                board: idBoard,
                 creator: me.id,
+                list: 1,
+                position: lists[1].tasks.length,
             };
+
             const response = await Api.post("/tasks", createData);
 
             try {
@@ -193,7 +205,7 @@ const Index = ({ task, index, onClose, idBoard }) => {
                 return Error(error);
             }
 
-            index();
+            indexBoard();
             onClose();
             Notification("success", "Tarefa cadastrada");
         } catch (error) {
@@ -219,7 +231,8 @@ const Index = ({ task, index, onClose, idBoard }) => {
                 return Error(error);
             }
 
-            index();
+            indexBoard();
+            onClose();
             Notification("success", "Tarefa atualizada");
         } catch (error) {
             Error(error);
@@ -244,7 +257,7 @@ const Index = ({ task, index, onClose, idBoard }) => {
                 return Error(error);
             }
 
-            index();
+            indexBoard();
             onClose();
             Notification("success", "Tarefa removido");
         } catch (error) {
@@ -294,7 +307,7 @@ const Index = ({ task, index, onClose, idBoard }) => {
             await Api.put(`/tasks/${data.id}`, { status: data.status + 1 });
 
             onClose();
-            index();
+            indexBoard();
         } catch (error) {
             Error(error);
         }
@@ -305,7 +318,7 @@ const Index = ({ task, index, onClose, idBoard }) => {
             await Api.put(`/tasks/${data.id}`, { status: data.status - 1 });
 
             onClose();
-            index();
+            indexBoard();
         } catch (error) {
             Error(error);
         }
@@ -314,22 +327,35 @@ const Index = ({ task, index, onClose, idBoard }) => {
     return (
         <Container>
             <Form onSubmit={handleSubmit}>
+                <FormItem>
+                    <Input
+                        type="text"
+                        label="Título*"
+                        value={data.title || ""}
+                        onChange={(event) =>
+                            setData({ ...data, title: event.target.value })
+                        }
+                    />
+                </FormItem>
                 <Row>
                     <FormItem>
                         <Input
-                            type="text"
-                            label="Título*"
-                            value={data.title || ""}
+                            type="datetime-local"
+                            label="Início"
+                            value={data.createdAt ? data.createdAt : ""}
                             onChange={(event) =>
-                                setData({ ...data, title: event.target.value })
+                                setData({
+                                    ...data,
+                                    createdAt: event.target.value,
+                                })
                             }
                         />
                     </FormItem>
                     <FormItem>
                         <Input
-                            type="date"
+                            type="datetime-local"
                             label="Vencimento"
-                            value={data.dueDate || ""}
+                            value={data.dueDate}
                             onChange={(event) =>
                                 setData({
                                     ...data,
@@ -349,6 +375,18 @@ const Index = ({ task, index, onClose, idBoard }) => {
                                 description: event.target.value,
                             })
                         }
+                    />
+                </FormItem>
+                <FormItem>
+                    <Switch
+                        label="Dia todo"
+                        onChange={(event) => {
+                            setData({
+                                ...data,
+                                isAllDay: event,
+                            });
+                        }}
+                        value={data.isAllDay || false}
                     />
                 </FormItem>
                 <Label>

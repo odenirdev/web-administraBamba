@@ -13,6 +13,7 @@ import Notification, { Error } from "../../modules/notifications";
 import Confirm from "../../modules/alertConfirm";
 
 import EmptyImage from "../../assets/images/empty.jpg";
+import System from "../../modules/system";
 
 const Container = Styled.div`
     display: flex;
@@ -22,7 +23,9 @@ const Container = Styled.div`
 const Index = ({ user, updateUsers, onClose }) => {
     const [data, setData] = useState({ image: {} });
 
-    const { me } = useContext(AuthContext);
+    const {
+        auth: { me },
+    } = useContext(AuthContext);
 
     useEffect(() => {
         try {
@@ -181,15 +184,11 @@ const Index = ({ user, updateUsers, onClose }) => {
         return create(resquestData);
     }
 
-    function isAdmin() {
-        return me.role && me.role.id === 4;
-    }
-
     return (
         <Container>
             <Form max-width="70%" sm-max-width="100%" onSubmit={handleSubmit}>
                 <div className="d-flex justify-content-center mb-3">
-                    {isAdmin() ? (
+                    {System.isAdmin() ? (
                         <File
                             width={120}
                             height={120}
@@ -247,7 +246,7 @@ const Index = ({ user, updateUsers, onClose }) => {
                     }}
                     maxLength={30}
                     value={data.username || ""}
-                    readOnly={!isAdmin}
+                    readOnly={!System.isAdmin()}
                 />
                 <Input
                     label="E-Mail*"
@@ -256,7 +255,7 @@ const Index = ({ user, updateUsers, onClose }) => {
                     }}
                     maxLength={30}
                     value={data.email || ""}
-                    readOnly={!isAdmin()}
+                    readOnly={!System.isAdmin()}
                 />
                 <Select
                     label="Nível de Acesso*"
@@ -267,14 +266,14 @@ const Index = ({ user, updateUsers, onClose }) => {
                             role: parseInt(event.target.value),
                         });
                     }}
-                    disabled={!isAdmin()}
+                    disabled={!System.isAdmin()}
                 >
                     <option value="">Selecione...</option>
                     <option value="4">Administrador</option>
                     <option value="3">Diretoria</option>
                     <option value="1">Componente</option>
                 </Select>
-                {isAdmin() && (
+                {System.isAdmin() && (
                     <GridButtons>
                         {Object.keys(user).length === 0 ? (
                             <Button type="submit">
