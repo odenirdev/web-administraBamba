@@ -1,4 +1,4 @@
-import React, { useState, useContext, useCallback, useEffect } from "react";
+import React, { useContext, useEffect } from "react";
 import { L10n, loadCldr } from "@syncfusion/ej2-base";
 import gregorian from "cldr-data/main/pt/ca-gregorian.json";
 import numbers from "cldr-data/main/pt/numbers.json";
@@ -13,6 +13,7 @@ import Api from "../../services/api";
 import Notification, { Error } from "../../modules/notifications";
 
 import AuthContext from "../AuthContext";
+import ScheduleContext from "./context";
 
 import {
     ScheduleComponent,
@@ -36,26 +37,7 @@ function Index() {
     const {
         auth: { me },
     } = useContext(AuthContext);
-
-    const [localData, setLocalData] = useState([]);
-
-    const index = useCallback(() => {
-        async function index() {
-            try {
-                const response = await Api.get(
-                    `/events?_limit=-1&deleted=false&users_contains=${me.id}`
-                );
-
-                const serializedData = serializeIndexData(response.data);
-
-                setLocalData(serializedData);
-            } catch (error) {
-                Error(error);
-            }
-        }
-
-        index();
-    }, [me.id]);
+    const { index, events } = useContext(ScheduleContext);
 
     useEffect(() => {
         index();
@@ -81,32 +63,6 @@ function Index() {
                 startTime,
                 endTime,
                 recurrenceRule,
-            };
-        });
-    }
-
-    function serializeIndexData(data) {
-        return data.map((event) => {
-            const {
-                id: Id,
-                subject: Subject,
-                isAllDay: IsAllDay,
-                startTime: StartTime,
-                endTime: EndTime,
-                description: Description,
-                location: Location,
-                recurrenceRule: RecurrenceRule,
-            } = event;
-
-            return {
-                Id,
-                Subject,
-                Description,
-                Location,
-                IsAllDay,
-                StartTime,
-                EndTime,
-                RecurrenceRule,
             };
         });
     }
@@ -200,7 +156,7 @@ function Index() {
                 currentView="Month"
                 locale="pt"
                 eventSettings={{
-                    dataSource: localData,
+                    dataSource: events,
                 }}
                 actionComplete={handleActionComplete}
                 allowMultiCellSelection={true}

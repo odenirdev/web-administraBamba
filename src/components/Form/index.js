@@ -21,7 +21,7 @@ const Index = Styled.form`
 `;
 
 export const FormItem = Styled(Col)`
-    padding: 0 0.25rem;
+    padding: 0.5rem 0.5rem;
 `;
 
 const StyledLabel = Styled(Label)`

@@ -30,6 +30,7 @@ import BoardContext from "../../components/Board/context";
 const Container = Styled.div`
     display: flex;
     justify-content: center;
+    padding: 1rem;
 `;
 
 const StatusButton = Styled(Button)`
@@ -76,9 +77,12 @@ const Index = ({ task, index, onClose }) => {
 
     const [board, setBoard] = useState({});
 
+    const [createEvent, setCreateEvent] = useState(false);
+
     const {
         auth: { me },
     } = useContext(AuthContext);
+
     const {
         data: { lists, id: idBoard },
         index: indexBoard,
@@ -92,6 +96,12 @@ const Index = ({ task, index, onClose }) => {
                     value: user.id,
                     label: user.username,
                 }));
+            }
+
+            if (task.event) {
+                setCreateEvent(true);
+            } else {
+                setCreateEvent(false);
             }
 
             try {
@@ -241,6 +251,10 @@ const Index = ({ task, index, onClose }) => {
 
     async function destroy() {
         try {
+            if (data.event) {
+                await Api.put(`/events/${data.event}`, { deleted: true });
+            }
+
             await Api.delete(`/tasks/${data.id}`);
 
             try {
@@ -273,7 +287,56 @@ const Index = ({ task, index, onClose }) => {
         return result;
     }
 
-    function handleSubmit(e) {
+    function serializerDataEvent(data) {
+        let {
+            title: subject,
+            description,
+            users,
+            dueDate: endTime,
+            created_at,
+        } = data;
+
+        if (!users.includes(me.id)) {
+            users.push(me.id);
+        }
+
+        return {
+            subject,
+            description,
+            startTime: created_at
+                ? new Date(created_at).setHours(0, 0)
+                : new Date().setHours(0, 0),
+            endTime: endTime
+                ? new Date(endTime).setHours(0, 0)
+                : new Date(created_at ? created_at : new Date()).setHours(0, 0),
+            users,
+            isAllDay: true,
+            isReadOnly: true,
+        };
+    }
+
+    async function handleCreateEvent(data) {
+        try {
+            const response = await Api.post(
+                "/events",
+                serializerDataEvent(data)
+            );
+
+            return response.data;
+        } catch (error) {
+            Error(error);
+        }
+    }
+
+    async function handleUpdateEvent(data, id) {
+        try {
+            await Api.put(`/events/${id}`, serializerDataEvent(data));
+        } catch (error) {
+            Error(error);
+        }
+    }
+
+    async function handleSubmit(e) {
         e.preventDefault();
         if (!data.title) {
             return Notification("warning", "Título é obrigatório");
@@ -292,6 +355,21 @@ const Index = ({ task, index, onClose }) => {
             delete requestData.dueDate;
         } else {
             requestData.dueDate = addDays(requestData.dueDate, 1);
+        }
+
+        if (createEvent) {
+            if (data.event) {
+                handleUpdateEvent(requestData, data.event);
+            } else {
+                const event = await handleCreateEvent(requestData);
+
+                requestData = { ...requestData, event: event.id };
+            }
+        } else {
+            if (data.event) {
+                await Api.put(`/events/${data.event}`, { deleted: true });
+            }
+            requestData.event = undefined;
         }
 
         if (requestData.id) {
@@ -327,33 +405,20 @@ const Index = ({ task, index, onClose }) => {
     return (
         <Container>
             <Form onSubmit={handleSubmit}>
-                <FormItem>
-                    <Input
-                        type="text"
-                        label="Título*"
-                        value={data.title || ""}
-                        onChange={(event) =>
-                            setData({ ...data, title: event.target.value })
-                        }
-                    />
-                </FormItem>
                 <Row>
                     <FormItem>
                         <Input
-                            type="datetime-local"
-                            label="Início"
-                            value={data.createdAt ? data.createdAt : ""}
+                            type="text"
+                            label="Título*"
+                            value={data.title || ""}
                             onChange={(event) =>
-                                setData({
-                                    ...data,
-                                    createdAt: event.target.value,
-                                })
+                                setData({ ...data, title: event.target.value })
                             }
                         />
                     </FormItem>
                     <FormItem>
                         <Input
-                            type="datetime-local"
+                            type="date"
                             label="Vencimento"
                             value={data.dueDate}
                             onChange={(event) =>
@@ -375,18 +440,6 @@ const Index = ({ task, index, onClose }) => {
                                 description: event.target.value,
                             })
                         }
-                    />
-                </FormItem>
-                <FormItem>
-                    <Switch
-                        label="Dia todo"
-                        onChange={(event) => {
-                            setData({
-                                ...data,
-                                isAllDay: event,
-                            });
-                        }}
-                        value={data.isAllDay || false}
                     />
                 </FormItem>
                 <Label>
@@ -416,6 +469,15 @@ const Index = ({ task, index, onClose }) => {
                         }}
                     />
                 </Label>
+                <FormItem>
+                    <Switch
+                        label="Criar evento"
+                        value={createEvent}
+                        onChange={(value) => {
+                            setCreateEvent(value);
+                        }}
+                    />
+                </FormItem>
                 {data.created_at && (
                     <span>
                         Criado em{" "}

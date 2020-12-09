@@ -1,14 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import Styled from "styled-components";
 import { Link } from "react-router-dom";
 import { FaUserCog, FaSignOutAlt } from "react-icons/fa";
 import { useHistory } from "react-router-dom";
 
 //import Notifications from "../../components/Notifications";
-import User from "../../components/NavBarUser";
-import Modal from "../../components/Modal";
-import Button from "../../components/Button";
-import Img from "../../components/Img";
+import User from "../NavBarUser";
+import Modal from "../Modal";
+import Button from "../Button";
+import Img from "../Img";
+
+import ScheduleContext from "../Schedule/context";
 
 import Profile from "../../modals/Profile";
 
@@ -106,6 +108,8 @@ const Index = () => {
 
     const [user, setUser] = useState({});
 
+    const { index } = useContext(ScheduleContext);
+
     useEffect(() => {
         async function show() {
             try {
@@ -152,6 +156,7 @@ const Index = () => {
                 <Header
                     onClick={() => {
                         history.push("/");
+                        index();
                     }}
                     className="cursor-pointer"
                 >

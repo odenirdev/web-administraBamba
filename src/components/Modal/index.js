@@ -41,7 +41,7 @@ const Grid = Styled.div`
 const Container = Styled.div`
     position: absolute;
     width: 100%;
-    max-width: 650px;
+    max-width: 800px;
     min-width: 280px;
     height: fit-content;
 

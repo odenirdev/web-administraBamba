@@ -8,6 +8,10 @@ import AuthContext from "./components/AuthContext";
 import { Error } from "./modules/notifications";
 import Api from "./services/api";
 
+import "../node_modules/bootstrap/dist/css/bootstrap.css";
+
+import "./assets/styles/global.css";
+
 const App = () => {
     const [auth, setAuth] = useState({ isAuthenticated: true, me: {} });
 
