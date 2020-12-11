@@ -1,17 +1,11 @@
-import React, { useState, useEffect, useCallback, useContext } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import Styled from "styled-components";
-import { FaEdit, FaTrash, FaPaperPlane, FaTimes } from "react-icons/fa";
-import { Row } from "react-bootstrap";
+import { FaEdit, FaTrash, FaPaperPlane } from "react-icons/fa";
 import { useHistory } from "react-router-dom";
 
-import Form, {
-    Input,
-    GridButtons,
-    TextArea,
-    ReactSelect,
-} from "../../components/Form";
+import Form, { Input, GridButtons, TextArea } from "../../components/Form";
 import Button from "../../components/Button";
-import Label from "../../components/Label";
+import SelectContributors from "../../components/SelectContributors";
 
 import AuthContext from "../../components/AuthContext";
 import BoardContext from "../../components/Board/context";
@@ -25,40 +19,20 @@ const Container = Styled.div`
     justify-content: center;
 `;
 
-const Contributor = Styled.div`
-    background-color: var(--gray-5);
-    width: fit-content;
-    margin: 10px 10px;
-    border-radius: 2px;
-    display: flex;
-
-    & span {
-        margin: 5px 10px;
-    }
-
-    & div {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        cursor: pointer;
-
-        & svg {
-            margin: 0 10px;
-        }
-
-        &:hover {
-            background-color: var(--red-1);
-            color: var(--gray-5);
-        }
-    }
-`;
-
 const Index = ({ onClose, index: indexBoards }) => {
     const history = useHistory();
 
-    const [data, setData] = useState({ users: [] });
+    const initialData = {
+        title: "",
+        description: "",
+        users: [],
+    };
+
+    const [data, setData] = useState(initialData);
 
     const [users, setUsers] = useState([]);
+
+    const [selectedUsers, setSelectedUsers] = useState([]);
 
     const { data: board, index } = useContext(BoardContext);
 
@@ -71,17 +45,18 @@ const Index = ({ onClose, index: indexBoards }) => {
             if (Array.isArray(board.users)) {
                 const usersContributing = board.users.map((user) => ({
                     value: user.id,
-                    label: user.username,
+                    username: user.username,
+                    email: user.email,
+                    image: user.image.url,
                 }));
+
+                setSelectedUsers(usersContributing);
 
                 setData({
                     ...board,
-                    users: usersContributing,
                     creator: board.creator.id,
                 });
             }
-        } else {
-            setData(board);
         }
     }, [board]);
 
@@ -92,7 +67,9 @@ const Index = ({ onClose, index: indexBoards }) => {
 
                 const serializedUsers = response.data.map((user) => ({
                     value: user.id,
-                    label: user.username,
+                    username: user.username,
+                    email: user.email,
+                    image: user.image.url,
                 }));
 
                 if (data && Array.isArray(data.users)) {
@@ -116,35 +93,6 @@ const Index = ({ onClose, index: indexBoards }) => {
         indexUsers();
     }, [board, data, me]);
 
-    const handleSelectContributing = useCallback(
-        (user) => {
-            const filteredUsers = users.filter(
-                (filterUser) => filterUser.value !== user.value
-            );
-
-            setUsers(filteredUsers);
-
-            if (Array.isArray(data.users)) {
-                setData({ ...data, users: [...data.users, user] });
-            } else {
-                setData({ ...data, users: [user] });
-            }
-        },
-        [data, users]
-    );
-
-    function handleRemoveContributor(user) {
-        const newUsers = [...users, user];
-
-        setUsers(newUsers);
-
-        const filteredContributors = data.users.filter(
-            (filteredUser) => filteredUser.value !== user.value
-        );
-
-        setData({ ...data, users: filteredContributors });
-    }
-
     function handleValidate() {
         if (!data.title) {
             return { status: false, message: "Título é obrigatório" };
@@ -159,26 +107,13 @@ const Index = ({ onClose, index: indexBoards }) => {
 
     async function create(data) {
         try {
-            const response = await Api.post("/boards", {
+            await Api.post("/boards", {
                 ...data,
                 creator: me.id,
             });
 
-            try {
-                await Api.post("/logs", {
-                    entity: 1,
-                    type: 0,
-                    data: response.data,
-                    createdAt: new Date(),
-                    user: me.id,
-                });
-            } catch (error) {
-                await Api.delete(`/boards/${response.data.id}`);
-
-                return Error(error);
-            }
-
             indexBoards();
+            setData(initialData);
             onClose();
             Notification("success", "Quadro cadastrado");
         } catch (error) {
@@ -188,23 +123,10 @@ const Index = ({ onClose, index: indexBoards }) => {
 
     async function update(data) {
         try {
-            const response = await Api.put(`/boards/${data.id}`, data);
-
-            try {
-                await Api.post("/logs", {
-                    entity: 1,
-                    type: 1,
-                    data: response.data,
-                    createdAt: new Date(),
-                    user: me.id,
-                });
-            } catch (error) {
-                await Api.put(`/boards/${data.id}`, board);
-
-                return Error(error);
-            }
+            await Api.put(`/boards/${data.id}`, data);
 
             index();
+            setData(initialData);
             onClose();
             Notification("success", "Quadro atualizado");
         } catch (error) {
@@ -220,30 +142,18 @@ const Index = ({ onClose, index: indexBoards }) => {
                 try {
                     data.lists.forEach((list) => {
                         list.tasks.map(async (task) => {
-                            await Api.delete(`/tasks/${task.id}`);
+                            await Api.put(`/tasks/${task.id}`, {
+                                deleted: true,
+                            });
                         });
                     });
 
-                    await Api.delete(`/boards/${data.id}`);
-
-                    try {
-                        await Api.post("/logs", {
-                            entity: 1,
-                            type: 2,
-                            data: data,
-                            createdAt: new Date(),
-                            user: me.id,
-                        });
-                    } catch (error) {
-                        data.tasks.map(async (task) => {
-                            await Api.post(`/tasks`, task);
-                        });
-
-                        await Api.post(`/boards/`, data);
-                        return Error(error);
-                    }
+                    await Api.put(`/boards/${data.id}`, {
+                        deleted: true,
+                    });
 
                     Notification("success", "Quadro removido");
+                    setData(initialData);
                     history.push("/boards");
                 } catch (error) {
                     Error(error);
@@ -260,13 +170,9 @@ const Index = ({ onClose, index: indexBoards }) => {
         }
 
         let requestData;
-        if (Array.isArray(data.users)) {
-            const users = data.users.map((user) => user.value);
+        const users = selectedUsers.map((user) => user.value);
 
-            requestData = { ...data, users };
-        } else {
-            requestData = { ...data, users: [] };
-        }
+        requestData = { ...data, users };
 
         if (data.id) {
             update(requestData);
@@ -285,7 +191,7 @@ const Index = ({ onClose, index: indexBoards }) => {
                         setData({ ...data, title: event.target.value })
                     }
                     maxLength={30}
-                    value={data && (data.title || "")}
+                    value={data.title}
                 />
                 <TextArea
                     label="Descrição*"
@@ -293,42 +199,16 @@ const Index = ({ onClose, index: indexBoards }) => {
                         setData({ ...data, description: event.target.value })
                     }
                     maxLength={280}
-                    value={data && (data.description || "")}
+                    value={data.description}
                 />
-                {me.role && me.role.id >= 3 && (
-                    <Label>
-                        Contribuidores
-                        <Row>
-                            {data && Array.isArray(data.users) && (
-                                <>
-                                    {data.users.map((user) => (
-                                        <div key={user.value}>
-                                            {me.id !== user.value && (
-                                                <Contributor>
-                                                    <span>{user.label}</span>
-                                                    <div
-                                                        onClick={() => {
-                                                            handleRemoveContributor(
-                                                                user
-                                                            );
-                                                        }}
-                                                    >
-                                                        <FaTimes />
-                                                    </div>
-                                                </Contributor>
-                                            )}
-                                        </div>
-                                    ))}
-                                </>
-                            )}
-                        </Row>
-                        <ReactSelect
-                            options={users}
-                            onChange={(event) => {
-                                handleSelectContributing(event);
-                            }}
-                        />
-                    </Label>
+                {me.role && (
+                    <SelectContributors
+                        {...{ users }}
+                        onChange={(values) => {
+                            setSelectedUsers(values);
+                        }}
+                        value={selectedUsers}
+                    />
                 )}
                 <GridButtons>
                     {!board ? (

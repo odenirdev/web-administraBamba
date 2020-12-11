@@ -4,11 +4,10 @@ import { FaPlus } from "react-icons/fa";
 
 const Button = Styled.button`
     border: 0;
-    border-radius: 27px;
+    border-radius: 21px;
     
-    margin-left: 1rem;
-    height: 54px;
-    width: 54px;
+    height: 42px;
+    width: 42px;
     
     font-size: 2rem;
 
@@ -26,12 +25,11 @@ const Button = Styled.button`
     }
 
     & .add-plus-icon {
-        font-size: 1rem;
-        margin: 0 0.2rem 0.5rem 0;
+        font-size: 0.8rem;
     }
     
     & .add-icon {
-        font-size: 1.5rem;
+        font-size: 1.2rem;
     }
 
 `;

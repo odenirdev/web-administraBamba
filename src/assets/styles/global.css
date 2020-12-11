@@ -27,9 +27,9 @@
     --font-title: Roboto, sans-serif;
     --font-content: Nunito, sans-serif;
 
-    --input-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
-    --button-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
-    --shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+    --input-shadow: 1px 1px 3px -1px rgba(0, 0, 0, 0.25);
+    --button-shadow: 1px 1px 3px -1px rgba(0, 0, 0, 0.25);
+    --shadow: 1px 1px 3px -1px rgba(0, 0, 0, 0.25);
 
     font-size: 80%;
 }
@@ -161,8 +161,8 @@ h4 {
 
 .e-schedule .e-month-view .e-current-date .e-date-header,
 .e-schedule .e-month-agenda-view .e-current-date .e-date-header {
-    background-color: var(--color-primary) !important;
-    color: #fafafa !important;
+    background-color: transparent !important;
+    color: var(--color-primary) !important;
     text-decoration: none;
     padding: 3px;
 }
@@ -582,4 +582,12 @@ textarea.e-input::selection,
 .e-radio:checked + label::after {
     background-color: var(--color-primary) !important;
     color: var(--color-primary) !important;
+}
+
+.e-quick-popup-wrapper .e-event-popup .e-popup-header {
+    background-color: var(--color-primary) !important;
+}
+
+.mb-1 {
+    margin-bottom: 1rem !important;
 }
