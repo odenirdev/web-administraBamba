@@ -76,9 +76,7 @@ const Index = () => {
 
     return (
         <Container>
-            <Main>
-                <Schedule />
-            </Main>
+            <Schedule />
         </Container>
     );
 };

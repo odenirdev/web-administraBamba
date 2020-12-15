@@ -4,19 +4,24 @@ import { Link } from "react-router-dom";
 import { FaUserCog, FaSignOutAlt } from "react-icons/fa";
 import { useHistory } from "react-router-dom";
 
-//import Notifications from "../../components/Notifications";
+import Notifications from "../../components/Notifications";
 import User from "../NavBarUser";
 import Modal from "../Modal";
 import Button from "../Button";
 import Img from "../Img";
 
 import ScheduleContext from "../Schedule/context";
+import AuthContext from "../AuthContext";
 
 import Profile from "../../modals/Profile";
 
 import Logo from "../../assets/images/Logo.png";
 
+import NotificationsGrid from "../NotificationsGrid";
+
+import Firebase from "../../services/firebase";
 import Api from "../../services/api";
+
 import { Error } from "../../modules/notifications";
 
 const Container = Styled.div`
@@ -27,7 +32,8 @@ const Container = Styled.div`
     justify-content: space-between;
 
 
-    filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));
+
+    filter: drop-shadow(1px 1px 1px rgba(0, 0, 0, 0.25));
 `;
 
 const Header = Styled.header`
@@ -54,6 +60,8 @@ const Header = Styled.header`
 
 const Section = Styled.section`
     display: flex;
+
+    position: relative;
 `;
 
 const UserGrid = Styled.div`
@@ -110,6 +118,36 @@ const Index = () => {
 
     const { index } = useContext(ScheduleContext);
 
+    const [notifications, setNotifications] = useState([]);
+
+    const [showNotifications, setShowNotifications] = useState(false);
+
+    const {
+        auth: { me },
+    } = useContext(AuthContext);
+
+    useEffect(() => {
+        Firebase.child("notifications").on("value", (snapshot) => {
+            const values = snapshot.val();
+
+            const notifications = [];
+
+            if (values === null) return;
+
+            Object.keys(values).forEach((id) => {
+                const notification = values[id];
+
+                if (notification.saw) return;
+
+                if (notification.to !== me.id) return;
+
+                notifications.push({ ...notification, id });
+            });
+
+            setNotifications(notifications);
+        });
+    }, [me.id]);
+
     useEffect(() => {
         async function show() {
             try {
@@ -152,6 +190,11 @@ const Index = () => {
                     Sair
                 </Link>
             </UserGrid>
+
+            <NotificationsGrid
+                {...{ show: showNotifications, notifications }}
+            />
+
             <Container>
                 <Header
                     onClick={() => {
@@ -163,9 +206,11 @@ const Index = () => {
                     <Img src={Logo} width="5rem" />
                 </Header>
                 <Section>
-                    {
-                        // <Notifications />
-                    }
+                    <Notifications
+                        number={notifications.length}
+                        onClick={() => setShowNotifications(!showNotifications)}
+                    />
+
                     <User src={image} onClick={() => setDrop(!drop)} />
                 </Section>
             </Container>

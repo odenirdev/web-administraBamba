@@ -79,9 +79,10 @@ const Index = ({ match }) => {
                             tasks: sortByKey(
                                 tasks.filter(
                                     (task) =>
-                                        task.status === 0 ||
-                                        (task.status === 1 &&
-                                            isOverDue(task.dueDate))
+                                        (task.status === 0 ||
+                                            (task.status === 1 &&
+                                                isOverDue(task.dueDate))) &&
+                                        task.deleted === false
                                 ),
                                 "position"
                             ),
@@ -94,7 +95,8 @@ const Index = ({ match }) => {
                                 tasks.filter(
                                     (task) =>
                                         task.status === 1 &&
-                                        !isOverDue(task.dueDate)
+                                        !isOverDue(task.dueDate) &&
+                                        task.deleted === false
                                 ),
                                 "position"
                             ),
@@ -104,7 +106,11 @@ const Index = ({ match }) => {
                             creatable: false,
                             done: false,
                             tasks: sortByKey(
-                                tasks.filter((task) => task.status === 2),
+                                tasks.filter(
+                                    (task) =>
+                                        task.status === 2 &&
+                                        task.deleted === false
+                                ),
                                 "position"
                             ),
                         },
@@ -113,7 +119,11 @@ const Index = ({ match }) => {
                             creatable: false,
                             done: false,
                             tasks: sortByKey(
-                                tasks.filter((task) => task.status === 3),
+                                tasks.filter(
+                                    (task) =>
+                                        task.status === 3 &&
+                                        task.deleted === false
+                                ),
                                 "position"
                             ),
                         },

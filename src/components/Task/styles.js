@@ -6,8 +6,8 @@ export const Container = styled(Col).attrs({
 })`
     background-color: var(--gray-5);
     color: var(--gray-2);
-    max-width: 90%;
-    margin: 10px auto;
+    width: 100%;
+    margin: 10px 0;
 
     box-shadow: var(--shadow);
 

@@ -66,7 +66,11 @@ const Index = () => {
                     "/users?_limit=-1&_sort=username:ASC"
                 );
 
-                setUsers(response.data);
+                const filteredUsers = response.data.filter(
+                    (user) => user.blocked !== true
+                );
+
+                setUsers(filteredUsers);
             } catch (error) {
                 Error(error);
             }

@@ -11,6 +11,8 @@ import AuthContext from "../../components/AuthContext";
 import BoardContext from "../../components/Board/context";
 
 import Api from "../../services/api";
+import Firebase from "../../services/firebase";
+
 import Notification, { Error } from "../../modules/notifications";
 import Confirm from "../../modules/alertConfirm";
 
@@ -107,13 +109,31 @@ const Index = ({ onClose, index: indexBoards }) => {
 
     async function create(data) {
         try {
-            await Api.post("/boards", {
+            const response = await Api.post("/boards", {
                 ...data,
                 creator: me.id,
             });
 
+            selectedUsers.forEach((item) => {
+                Firebase.child("notifications").push(
+                    {
+                        title: "Contribuição adicionada",
+                        description: `Você está contribuindo para um novo quadro "${data.title}" criado por ${me.username}`,
+                        saw: false,
+                        to_url: `/board/${response.data.id}`,
+                        to: item.value,
+                    },
+                    (error) => {
+                        if (error) {
+                            Error(error);
+                        }
+                    }
+                );
+            });
+
             indexBoards();
             setData(initialData);
+            setSelectedUsers([]);
             onClose();
             Notification("success", "Quadro cadastrado");
         } catch (error) {
@@ -121,13 +141,63 @@ const Index = ({ onClose, index: indexBoards }) => {
         }
     }
 
+    function handleUpdateNotifications(data) {
+        const newDataUsers = data.users;
+
+        const oldDataUsers = board.users.map((user) => parseInt(user.id));
+
+        const addedUsers = newDataUsers.filter(
+            (user) => !oldDataUsers.includes(user)
+        );
+
+        const removedUsers = oldDataUsers.filter(
+            (user) => !newDataUsers.includes(user)
+        );
+
+        addedUsers.forEach((user) => {
+            Firebase.child("notifications").push(
+                {
+                    title: "Contribuição adicionada",
+                    description: `Você está contribuindo para um novo quadro "${data.title}"`,
+                    saw: false,
+                    to_url: `/board/${board.id}`,
+                    to: user,
+                },
+                (error) => {
+                    if (error) {
+                        Error(error);
+                    }
+                }
+            );
+        });
+
+        removedUsers.forEach((user) => {
+            Firebase.child("notifications").push(
+                {
+                    title: "Contribuição removida",
+                    description: `Você não está mais contribuindo para quadro "${board.title}"`,
+                    saw: false,
+                    to_url: "",
+                    to: user,
+                },
+                (error) => {
+                    if (error) {
+                        Error(error);
+                    }
+                }
+            );
+        });
+    }
+
     async function update(data) {
         try {
             await Api.put(`/boards/${data.id}`, data);
 
+            handleUpdateNotifications(data);
             index();
             setData(initialData);
             onClose();
+            setSelectedUsers([]);
             Notification("success", "Quadro atualizado");
         } catch (error) {
             Error(error);
@@ -150,6 +220,23 @@ const Index = ({ onClose, index: indexBoards }) => {
 
                     await Api.put(`/boards/${data.id}`, {
                         deleted: true,
+                    });
+
+                    selectedUsers.forEach((item) => {
+                        Firebase.child("notifications").push(
+                            {
+                                title: "Contribuição removida",
+                                description: `Quadro ${data.title} foi removido por ${me.username}`,
+                                saw: false,
+                                to_url: "",
+                                to: item.value,
+                            },
+                            (error) => {
+                                if (error) {
+                                    Error(error);
+                                }
+                            }
+                        );
                     });
 
                     Notification("success", "Quadro removido");
