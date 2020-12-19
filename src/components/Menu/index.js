@@ -122,6 +122,7 @@ const Index = () => {
             <MenuContainer display={display}>
                 <Link to="/school">Escola</Link>
                 <Link to="/boards">Quadros</Link>
+                <Link to="/conversations">Conversas</Link>
             </MenuContainer>
         </Container>
     );

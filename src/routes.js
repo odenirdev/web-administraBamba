@@ -11,6 +11,7 @@ import School from "./pages/School";
 import RegisterSchool from "./pages/RegisterSchool";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
+import Conversations from "./pages/Conversations";
 
 import AuthContext from "./components/AuthContext";
 
@@ -52,6 +53,16 @@ const Index = () => {
                 <Authenticated exact path="/boards" component={Boards} />
                 <Authenticated exact path="/board/:id" component={Board} />
                 <Authenticated exact path="/school" component={School} />
+                <Authenticated
+                    exact
+                    path="/conversations"
+                    component={Conversations}
+                />
+                <Authenticated
+                    exact
+                    path="/conversations/:id"
+                    component={Conversations}
+                />
                 <Authenticated
                     exact
                     path="/register-school"

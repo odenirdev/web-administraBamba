@@ -8,9 +8,6 @@ const Index = Styled.div`
     border-radius: 50px;
     animation: spin 1s linear infinite;
 
-    position: absolute;
-    right: 1rem;
-    bottom: 1rem;
 
     @keyframes spin {
         from {

@@ -27,8 +27,6 @@ import {
     Agenda,
 } from "@syncfusion/ej2-react-schedule";
 
-import { Container } from "./styles";
-
 loadCldr(numberingSystems, gregorian, numbers, timeZoneNames, weekData);
 
 L10n.load(config);
