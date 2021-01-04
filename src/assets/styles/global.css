@@ -20,6 +20,7 @@
     --blue-1: #1321bf;
     --blue-2: #1728e6;
     --blue-3: #3948e6;
+    --brown: #795548;
 
     --bg-color: var(--gray-6);
     --color-primary: var(--purple-3);
@@ -44,6 +45,7 @@
     padding: 0;
     margin: 0;
     box-sizing: border-box;
+    outline: 0;
 }
 
 .row,

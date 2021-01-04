@@ -9969,10 +9969,10 @@ react-notifications@^1.7.2:
     prop-types "^15.5.10"
     react-transition-group "^4.4.1"
 
-react-og-forms@^1.0.2:
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/react-og-forms/-/react-og-forms-1.0.2.tgz#81575361d291355c9ce88bf700d0cae55466e67c"
-  integrity sha512-HuZBZr6wM44gy7lsN9bgeHIYFghv2ugWWXSw1ajv/7YdlF5tTpZ1XGC4Um+ZzUDsOhp6zByTdsEvFz5sv6emJA==
+react-og-forms@^1.1.4:
+  version "1.1.4"
+  resolved "https://registry.yarnpkg.com/react-og-forms/-/react-og-forms-1.1.4.tgz#049f9c57f595981d159566e62350d4a3f4df9001"
+  integrity sha512-PqgE4X4L94mEPzYAWL1j71I8MVhqkqm6XrAtTwKZasB3k1eJPb1ShNZ0HSUUL3U7/yBqjiP/RgO9G+4avHmR9g==
   dependencies:
     axios "^0.21.0"
     filesize "^6.1.0"

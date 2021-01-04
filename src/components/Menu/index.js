@@ -123,6 +123,7 @@ const Index = () => {
                 <Link to="/school">Escola</Link>
                 <Link to="/boards">Quadros</Link>
                 <Link to="/conversations">Conversas</Link>
+                <Link to="/assets">Atívos</Link>
             </MenuContainer>
         </Container>
     );
