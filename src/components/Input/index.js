@@ -200,12 +200,16 @@ const Index = Styled.input`
     min-width: ${(props) => props["min-width"] || "auto"};
     max-width: ${(props) => props["max-width"] || "auto"};
 
-    background-color: var(--gray-5);
+    background-color: #FAFAFA;
     border: 0;
     border-radius: 5px;
     padding: 1.4rem 1.4rem;
 
     box-shadow: var(--input-shadow);
+
+    margin-bottom: 0.5rem;
+
+    outline: 0;
 `;
 
 export default Index;

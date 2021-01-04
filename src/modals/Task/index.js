@@ -1,27 +1,27 @@
-import React, { useEffect, useState, useCallback, useContext } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import Styled from "styled-components";
 import { Row } from "react-bootstrap";
 import { Switch } from "react-og-forms";
+import {
+    FaEdit,
+    FaTrash,
+    FaPaperPlane,
+    FaAngleLeft,
+    FaAngleRight,
+} from "react-icons/fa";
 
 import Form, {
     Input,
     GridButtons,
     TextArea,
     FormItem,
-    ReactSelect,
 } from "../../components/Form";
 import Button from "../../components/Button";
-import Label from "../../components/Label";
-import {
-    FaEdit,
-    FaTrash,
-    FaPaperPlane,
-    FaTimes,
-    FaAngleLeft,
-    FaAngleRight,
-} from "react-icons/fa";
+import SelectContributors from "../../components/SelectContributors";
 
 import Api from "../../services/api";
+import Firebase from "../../services/firebase";
+
 import Notification, { Error } from "../../modules/notifications";
 
 import AuthContext from "../../components/AuthContext";
@@ -42,40 +42,22 @@ const StatusButton = Styled(Button)`
     }
 `;
 
-const Contributor = Styled.div`
-    background-color: var(--gray-5);
-    width: fit-content;
-    margin: 10px 10px;
-    border-radius: 2px;
-    display: flex;
+const Index = ({ id, onClose }) => {
+    const initalData = {
+        title: "",
+        dueDate: "Y-m-d",
+        description: "",
+    };
 
-    & span {
-        margin: 5px 10px;
-    }
-
-    & div {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        cursor: pointer;
-
-        & svg {
-            margin: 0 10px;
-        }
-
-        &:hover {
-            background-color: var(--red-1);
-            color: var(--gray-5);
-        }
-    }
-`;
-
-const Index = ({ task, index, onClose }) => {
-    const [data, setData] = useState({});
+    const [data, setData] = useState(initalData);
 
     const [users, setUsers] = useState([]);
 
     const [board, setBoard] = useState({});
+
+    const [selectedUsers, setSelectedUsers] = useState([]);
+
+    const [oldSelectedUsers, setOldSelectedUsers] = useState([]);
 
     const [createEvent, setCreateEvent] = useState(false);
 
@@ -89,104 +71,124 @@ const Index = ({ task, index, onClose }) => {
     } = useContext(BoardContext);
 
     useEffect(() => {
-        if (!(Object.keys(task).length === 0)) {
-            let usersContributing = [];
-            if (Array.isArray(task.users)) {
+        async function showTask() {
+            try {
+                const response = await Api.get(`/tasks/${id}`);
+
+                let task = response.data;
+
+                let usersContributing = [];
                 usersContributing = task.users.map((user) => ({
                     value: user.id,
-                    label: user.username,
+                    username: user.username,
+                    email: user.email,
+                    image: user.image.url,
                 }));
-            }
 
-            if (task.event) {
-                setCreateEvent(true);
-            } else {
-                setCreateEvent(false);
-            }
+                setOldSelectedUsers(usersContributing);
 
-            try {
+                setSelectedUsers(usersContributing);
+
+                if (task.event && Object.keys(task.event).length !== 0) {
+                    setCreateEvent(true);
+                } else {
+                    setCreateEvent(false);
+                }
+
                 setData({
                     ...task,
-                    users: usersContributing,
+                    event: task.event && task.event.id,
                     creator: task.creator.id,
                 });
             } catch (error) {
-                setData({ ...task, users: usersContributing });
+                Error(error);
             }
-        } else {
-            setData({});
         }
-    }, [task]);
+
+        if (id) showTask();
+    }, [id, idBoard]);
 
     useEffect(() => {
         async function showBoard() {
-            if (typeof task.board === "object") {
-                const response = await Api.get(`/boards/${task.board.id}`);
+            const response = await Api.get(`/boards/${idBoard}`);
 
-                setBoard(response.data);
-            } else if (idBoard) {
-                const response = await Api.get(`/boards/${idBoard}`);
-
-                setBoard(response.data);
-            }
+            setBoard(response.data);
         }
 
         showBoard();
-    }, [idBoard, task]);
+    }, [idBoard]);
 
     useEffect(() => {
         if (Array.isArray(board.users)) {
             let contributorsUsers = board.users.map((user) => ({
                 value: user.id,
-                label: user.username,
+                username: user.username,
+                email: user.email,
+                image: user.image.url,
             }));
 
             contributorsUsers = [
                 ...contributorsUsers,
-                { value: board.creator.id, label: board.creator.username },
+                {
+                    value: board.creator.id,
+                    username: board.creator.username,
+                    email: board.creator.email,
+                    image: board.creator.image.url,
+                },
             ];
 
-            if (Array.isArray(task.users)) {
-                const usersTask = task.users.map((user) => user.id);
-
-                const filteredUsers = contributorsUsers.filter(
-                    (user) => !usersTask.includes(user.value)
-                );
-
-                setUsers(filteredUsers);
-            } else {
-                setUsers(contributorsUsers);
-            }
+            setUsers(contributorsUsers);
         }
-    }, [board, task]);
+    }, [board]);
 
-    const handleSelectContributing = useCallback(
-        (user) => {
-            const filteredUsers = users.filter(
-                (filterUser) => filterUser.value !== user.value
-            );
+    function handleUpdateNotifications(data) {
+        const newDataUsers = data.users;
 
-            setUsers(filteredUsers);
-
-            if (Array.isArray(data.users)) {
-                setData({ ...data, users: [...data.users, user] });
-            } else {
-                setData({ ...data, users: [user] });
-            }
-        },
-        [data, users]
-    );
-
-    function handleRemoveContributor(user) {
-        const newUsers = [...users, user];
-
-        setUsers(newUsers);
-
-        const filteredContributors = data.users.filter(
-            (filteredUser) => filteredUser.value !== user.value
+        const oldDataUsers = oldSelectedUsers.map((user) =>
+            parseInt(user.value)
         );
 
-        setData({ ...data, users: filteredContributors });
+        const addedUsers = newDataUsers.filter(
+            (user) => !oldDataUsers.includes(user)
+        );
+
+        const removedUsers = oldDataUsers.filter(
+            (user) => !newDataUsers.includes(user)
+        );
+
+        addedUsers.forEach((user) => {
+            Firebase.child("notifications").push(
+                {
+                    title: "Contribuição adicionada",
+                    description: `Você está contribuindo para um novo quadro "${board.title}"`,
+                    saw: false,
+                    to_url: `/board/${board.id}`,
+                    to: user,
+                },
+                (error) => {
+                    if (error) {
+                        Error(error);
+                    }
+                }
+            );
+        });
+
+        removedUsers.forEach((user) => {
+            Firebase.child("notifications").push(
+                {
+                    title: "Contribuição removida",
+                    description: `Você não está mais contribuindo para quadro ${board.title}`,
+                    saw: false,
+                    to_url: "",
+                    to: user,
+                },
+                (error) => {
+                    if (error) {
+                        Error(error);
+                    }
+                }
+            );
+        });
     }
 
     async function create(data) {
@@ -199,24 +201,29 @@ const Index = ({ task, index, onClose }) => {
                 position: lists[1].tasks.length,
             };
 
-            const response = await Api.post("/tasks", createData);
+            await Api.post("/tasks", createData);
 
-            try {
-                await Api.post("/logs", {
-                    entity: 2,
-                    type: 0,
-                    data: createData,
-                    createdAt: new Date(),
-                    user: me.id,
-                });
-            } catch (error) {
-                await Api.delete(`/tasks/${response.id}`);
-
-                return Error(error);
-            }
+            selectedUsers.forEach((item) => {
+                Firebase.child("notifications").push(
+                    {
+                        title: "Contribuição adicionada",
+                        description: `Você está contribuindo para uma novo tarefa "${data.title}"`,
+                        saw: false,
+                        to_url: `/board/${idBoard}`,
+                        to: item.value,
+                    },
+                    (error) => {
+                        if (error) {
+                            Error(error);
+                        }
+                    }
+                );
+            });
 
             indexBoard();
             onClose();
+            setData(initalData);
+            setSelectedUsers([]);
             Notification("success", "Tarefa cadastrada");
         } catch (error) {
             Error(error);
@@ -227,22 +234,12 @@ const Index = ({ task, index, onClose }) => {
         try {
             await Api.put(`/tasks/${data.id}`, data);
 
-            try {
-                await Api.post("/logs", {
-                    entity: 2,
-                    type: 1,
-                    data: data,
-                    createdAt: new Date(),
-                    user: me.id,
-                });
-            } catch (error) {
-                await Api.put(`/tasks/${data.id}`, task);
-
-                return Error(error);
-            }
+            handleUpdateNotifications(data);
 
             indexBoard();
             onClose();
+            setData(initalData);
+            setSelectedUsers([]);
             Notification("success", "Tarefa atualizada");
         } catch (error) {
             Error(error);
@@ -255,23 +252,28 @@ const Index = ({ task, index, onClose }) => {
                 await Api.put(`/events/${data.event}`, { deleted: true });
             }
 
-            await Api.delete(`/tasks/${data.id}`);
+            await Api.put(`/tasks/${id}`, { deleted: true });
 
-            try {
-                await Api.post("/logs", {
-                    entity: 2,
-                    type: 2,
-                    data: data,
-                    createdAt: new Date(),
-                    user: me.id,
-                });
-            } catch (error) {
-                await Api.post(`/tasks`, data);
-
-                return Error(error);
-            }
+            selectedUsers.forEach((item) => {
+                Firebase.child("notifications").push(
+                    {
+                        title: "Contribuição removida",
+                        description: `Tarefa '${data.title}' foi removida por ${me.username}`,
+                        saw: false,
+                        to_url: `/board/${idBoard}`,
+                        to: item.value,
+                    },
+                    (error) => {
+                        if (error) {
+                            Error(error);
+                        }
+                    }
+                );
+            });
 
             indexBoard();
+            setData(initalData);
+            setSelectedUsers([]);
             onClose();
             Notification("success", "Tarefa removido");
         } catch (error) {
@@ -343,18 +345,14 @@ const Index = ({ task, index, onClose }) => {
         }
 
         let requestData;
-        if (Array.isArray(data.users)) {
-            const users = data.users.map((user) => user.value);
+        const users = selectedUsers.map((user) => user.value);
 
-            requestData = { ...data, users };
-        } else {
-            requestData = { ...data, users: [] };
-        }
+        requestData = { ...data, users };
 
-        if (!requestData.dueDate || requestData.dueDate === "false") {
+        if (!requestData.dueDate || requestData.dueDate === "Y-m-d") {
             delete requestData.dueDate;
         } else {
-            requestData.dueDate = addDays(requestData.dueDate, 1);
+            requestData.dueDate = addDays(requestData.dueDate, 2);
         }
 
         if (createEvent) {
@@ -369,7 +367,8 @@ const Index = ({ task, index, onClose }) => {
             if (data.event) {
                 await Api.put(`/events/${data.event}`, { deleted: true });
             }
-            requestData.event = undefined;
+
+            requestData.event = "";
         }
 
         if (requestData.id) {
@@ -442,33 +441,15 @@ const Index = ({ task, index, onClose }) => {
                         }
                     />
                 </FormItem>
-                <Label>
-                    Contribuidores
-                    <Row>
-                        {Array.isArray(data.users) && (
-                            <>
-                                {data.users.map((user) => (
-                                    <Contributor key={user.value}>
-                                        <span>{user.label}</span>
-                                        <div
-                                            onClick={() => {
-                                                handleRemoveContributor(user);
-                                            }}
-                                        >
-                                            <FaTimes />
-                                        </div>
-                                    </Contributor>
-                                ))}
-                            </>
-                        )}
-                    </Row>
-                    <ReactSelect
-                        options={users}
-                        onChange={(event) => {
-                            handleSelectContributing(event);
+                <FormItem>
+                    <SelectContributors
+                        {...{ users }}
+                        onChange={(values) => {
+                            setSelectedUsers(values);
                         }}
+                        value={selectedUsers}
                     />
-                </Label>
+                </FormItem>
                 <FormItem>
                     <Switch
                         label="Criar evento"
@@ -485,7 +466,7 @@ const Index = ({ task, index, onClose }) => {
                     </span>
                 )}
                 <GridButtons>
-                    {Object.keys(task).length === 0 ? (
+                    {!id ? (
                         <Button type="submit">
                             <FaPaperPlane /> Confirmar
                         </Button>

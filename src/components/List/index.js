@@ -29,7 +29,7 @@ function List({ data, index: indexList }) {
                 }
             >
                 <TaskModal
-                    task={selectedTask}
+                    id={selectedTask.id}
                     onClose={() => {
                         setShowTask(false);
                         setSelectedTask({});

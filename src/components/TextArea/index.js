@@ -5,13 +5,15 @@ const Index = Styled.textarea`
     min-width: ${(props) => props["min-width"] || "auto"};
     max-width: ${(props) => props["max-width"] || "auto"};
 
-    background-color: var(--gray-5);
+    background-color: #FAFAFA;
     border: 0;
     border-radius: 5px;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
     padding: 1.4rem 1.4rem;
 
     box-shadow: var(--input-shadow);
+
+    outline: 0;
 `;
 
 export default Index;

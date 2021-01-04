@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import Styled from "styled-components";
 
 import Container from "../../components/Container";
 import Img from "../../components/Img";
@@ -14,10 +13,6 @@ import SchoolFail from "../../pages/SchoolFail";
 import RegisterSchool from "../../pages/RegisterSchool";
 
 import ADSAMBAIcon from "../../assets/images/adsamba-logo.png";
-
-const Main = Styled.main`
-
-`;
 
 const Index = () => {
     const [statusSchool, setStatusSchool] = useState(0);
@@ -76,9 +71,7 @@ const Index = () => {
 
     return (
         <Container>
-            <Main>
-                <Schedule />
-            </Main>
+            <Schedule />
         </Container>
     );
 };

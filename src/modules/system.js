@@ -36,6 +36,12 @@ class System {
         const today = new Date(formmatToday).getTime();
         return dueDate < today;
     }
+
+    static isMobile() {
+        var width = window.innerWidth;
+
+        return width <= 750;
+    }
 }
 
 export default System;

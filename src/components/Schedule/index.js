@@ -27,8 +27,6 @@ import {
     Agenda,
 } from "@syncfusion/ej2-react-schedule";
 
-import { Container } from "./styles";
-
 loadCldr(numberingSystems, gregorian, numbers, timeZoneNames, weekData);
 
 L10n.load(config);
@@ -151,32 +149,30 @@ function Index() {
     }
 
     return (
-        <Container>
-            <ScheduleComponent
-                currentView="Month"
-                locale="pt"
-                eventSettings={{
-                    dataSource: events,
-                }}
-                actionComplete={handleActionComplete}
-                allowMultiCellSelection={true}
-                allowMultiRowSelection={true}
-                allowResizing={true}
-                allowDragAndDrop={true}
-            >
-                <Inject
-                    services={[
-                        Day,
-                        Week,
-                        WorkWeek,
-                        Month,
-                        Agenda,
-                        DragAndDrop,
-                        Resize,
-                    ]}
-                />
-            </ScheduleComponent>
-        </Container>
+        <ScheduleComponent
+            currentView="Month"
+            locale="pt"
+            eventSettings={{
+                dataSource: events,
+            }}
+            actionComplete={handleActionComplete}
+            allowMultiCellSelection={true}
+            allowMultiRowSelection={true}
+            allowResizing={true}
+            allowDragAndDrop={true}
+        >
+            <Inject
+                services={[
+                    Day,
+                    Week,
+                    WorkWeek,
+                    Month,
+                    Agenda,
+                    DragAndDrop,
+                    Resize,
+                ]}
+            />
+        </ScheduleComponent>
     );
 }
 

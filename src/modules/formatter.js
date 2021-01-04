@@ -1,3 +1,6 @@
+import $ from "jquery";
+import "jquery-mask-plugin";
+
 export const fDate = (date, type) => {
     switch (type) {
         case "date":
@@ -8,4 +11,29 @@ export const fDate = (date, type) => {
             console.error("type date invalid");
             break;
     }
+};
+
+const getStaff = () => $("#staff");
+
+const setStaff = () => {
+    const inputStaff = document.createElement("input");
+    inputStaff.setAttribute("id", "staff");
+    inputStaff.setAttribute("type", "hidden");
+    document.querySelector("body").appendChild(inputStaff);
+};
+
+const removeStaff = () => {
+    $("#staff").remove();
+};
+
+export const Mask = (value, mask, options = {}) => {
+    setStaff();
+    const staff = getStaff();
+
+    staff.mask(mask, options);
+    const response = staff.masked(value);
+
+    removeStaff();
+
+    return response;
 };

@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback, useContext } from "react";
 import { useHistory } from "react-router-dom";
-import Styled from "styled-components";
-import { Row } from "react-bootstrap";
+
 import { FaClipboard } from "react-icons/fa";
 
 import Container from "../../components/Container";
@@ -17,22 +16,7 @@ import BoardModal from "../../modals/Board";
 import Api from "../../services/api";
 import { Error } from "../../modules/notifications";
 
-const Header = Styled.header`
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 1rem;
-`;
-
-const Section = Styled.section`
-    padding: 0 0.2rem;
-`;
-
-const Boards = Styled(Row)`
-    & h1 {
-        width: 100%;
-    }
-`;
+import { Header, Section, Boards } from "./styles";
 
 const Index = () => {
     const history = useHistory();
@@ -62,11 +46,11 @@ const Index = () => {
             try {
                 if (me.id) {
                     const responseMyBoards = await Api.get(
-                        `/boards?_limit=-1&creator=${me.id}`
+                        `/boards?_limit=-1&deleted=false&creator=${me.id}`
                     );
 
                     const responseContributing = await Api.get(
-                        `/boards?_limit=-1&users_in=${me.id}`
+                        `/boards?_limit=-1&deleted=false&users_in=${me.id}`
                     );
 
                     setContributeBoards(responseContributing.data);
