@@ -13,6 +13,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import Conversations from "./pages/Conversations";
 import Assets from "./pages/Assets";
+import Wallet from "./pages/Wallet";
 
 import AuthContext from "./components/AuthContext";
 
@@ -70,6 +71,7 @@ const Index = () => {
                     component={RegisterSchool}
                 />
                 <Authenticated exact path="/assets" component={Assets} />
+                <Authenticated exact path="/wallet" component={Wallet} />
             </Switch>
         </BrowserRouter>
     );

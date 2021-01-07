@@ -12,13 +12,4 @@ export const Container = styled.div`
             margin: 0;
         }
     }
-
-    .open-icon {
-        color: var(--brown);
-        cursor: pointer;
-
-        &:hover {
-            filter: brightness(120%);
-        }
-    }
 `;

@@ -124,6 +124,7 @@ const Index = () => {
                 <Link to="/boards">Quadros</Link>
                 <Link to="/conversations">Conversas</Link>
                 <Link to="/assets">Atívos</Link>
+                <Link to="/wallet">Carteira</Link>
             </MenuContainer>
         </Container>
     );
