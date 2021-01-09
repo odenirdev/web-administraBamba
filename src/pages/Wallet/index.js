@@ -113,7 +113,7 @@ function Index() {
 
     function handleOpenModal(item) {
         setShow(true);
-        setTitle("Moviventação");
+        setTitle("Movimentação");
         setType(item.type);
         setSelectedWallet(item);
     }
@@ -158,7 +158,7 @@ function Index() {
                         <div>
                             <Tooltip
                                 background={
-                                    Math.sign(total) === 1
+                                    Math.sign(total) >= 0
                                         ? "var(--blue)"
                                         : "var(--red)"
                                 }
@@ -166,12 +166,12 @@ function Index() {
                             >
                                 <strong
                                     className={
-                                        Math.sign(total) === 1
+                                        Math.sign(total) >= 0
                                             ? "money-all"
                                             : "money-out"
                                     }
                                 >
-                                    R$ {Math.sign(total) === 1 ? "+ " : "- "}
+                                    R$ {Math.sign(total) < 0 && "- "}
                                     {Mask(
                                         parseFloat(total).toFixed(2),
                                         "#.##0,00",

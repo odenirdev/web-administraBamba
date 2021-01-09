@@ -24,8 +24,18 @@ export const Container = styled.div`
             border-left: 2px solid rgba(0, 0, 0, 0.5);
             border-bottom: 1px solid rgba(0, 0, 0, 0.3);
 
+            div {
+                display: flex;
+            }
+
             p {
+                color: #000;
+                font-size: 1.5rem;
                 margin: 0;
+            }
+
+            span {
+                font-size: 1.2rem;
             }
 
             img {

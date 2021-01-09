@@ -161,9 +161,9 @@ function Index({ type, onClose, selectedWallet, reload }) {
             }" para "${data.reason}"`;
         }
 
-        await api.post("wallet-logs", {
+        await api.post("/wallet-logs", {
             createdBy: me.id,
-            createdAt: data.createdAt,
+            createdAt: new Date(),
             wallet: data.id,
             text,
         });
@@ -183,10 +183,10 @@ function Index({ type, onClose, selectedWallet, reload }) {
                     .slice(0, 16) &&
             data.reason === selectedWallet.reason
         ) {
-            return false;
+            return true;
         }
 
-        return true;
+        return false;
     }
 
     async function update(data) {
@@ -275,24 +275,41 @@ function Index({ type, onClose, selectedWallet, reload }) {
                         {movementHistory.length !== 0 &&
                             movementHistory.map((movement) => (
                                 <section key={movement.id}>
-                                    {console.log(movement)}
-                                    <img
-                                        src={`${api.defaults.baseURL}${movement.createdBy.image.url}`}
-                                        alt="Creator of movement"
-                                    />{" "}
-                                    <strong>
-                                        {movement.createdBy.username}
-                                    </strong>{" "}
-                                    <span>{movement.text}</span>
+                                    <div>
+                                        <p>
+                                            <img
+                                                src={`${api.defaults.baseURL}${movement.createdBy.image.url}`}
+                                                alt="Creator of movement"
+                                            />{" "}
+                                            <strong>
+                                                {movement.createdBy.username}
+                                            </strong>{" "}
+                                            {movement.text}
+                                        </p>
+                                    </div>
+                                    <span className="created-at">
+                                        {new Date(movement.createdAt)
+                                            .toLocaleString()
+                                            .slice(0, 16)}
+                                    </span>
                                 </section>
                             ))}
                         <footer>
-                            <img
-                                src={`${api.defaults.baseURL}${data.createdBy.image.url}`}
-                                alt="Creator of movement"
-                            />{" "}
-                            <strong>{data.createdBy.username}</strong>{" "}
-                            <span>adicionou está movimentação </span>
+                            <div>
+                                <p>
+                                    <img
+                                        src={`${api.defaults.baseURL}${data.createdBy.image.url}`}
+                                        alt="Creator of movement"
+                                    />{" "}
+                                    <strong>{data.createdBy.username}</strong>{" "}
+                                    adicionou está movimentação
+                                </p>
+                            </div>
+                            <span>
+                                {new Date(data.createdAt)
+                                    .toLocaleString()
+                                    .slice(0, 16)}
+                            </span>
                         </footer>
                     </Col>
                 )}
