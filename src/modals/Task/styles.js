@@ -17,7 +17,7 @@ export const Container = Styled.div`
 `;
 
 export const MoneyIn = Styled(Col)`
-    padding: 0;
+    padding: 0.5rem;
 
     display: ${(props) => (props.show ? "block" : "none")};
 `;

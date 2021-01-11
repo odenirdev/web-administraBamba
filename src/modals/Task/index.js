@@ -19,6 +19,7 @@ import Form, {
 } from "../../components/Form";
 import Button from "../../components/Button";
 import SelectContributors from "../../components/SelectContributors";
+import SelectAssets from "../../components/SelectAssets";
 
 import Api from "../../services/api";
 import Firebase from "../../services/firebase";
@@ -51,6 +52,8 @@ const Index = ({ id, onClose }) => {
     const [oldSelectedUsers, setOldSelectedUsers] = useState([]);
 
     const [createEvent, setCreateEvent] = useState(false);
+
+    const [selectedAssets, setSelectedAssets] = useState([]);
 
     const {
         auth: { me },
@@ -104,6 +107,24 @@ const Index = ({ id, onClose }) => {
                     reverse: true,
                 });
 
+                const serializedAssetsContribution = task[
+                    "assets_contributions"
+                ].map((item) => {
+                    return {
+                        ...item,
+                        asset: { id: item.asset },
+                        quantity: Mask(
+                            parseFloat(item.quantity).toFixed(2),
+                            "##0,00",
+                            {
+                                reverse: true,
+                            }
+                        ),
+                    };
+                });
+
+                setSelectedAssets(serializedAssetsContribution);
+
                 setData({
                     ...task,
                     event: task.event && task.event.id,
@@ -124,6 +145,8 @@ const Index = ({ id, onClose }) => {
             showTask();
         } else {
             setData(initalData);
+            setSelectedAssets([]);
+            setSelectedUsers([]);
         }
     }, [id, idBoard]);
 
@@ -216,6 +239,8 @@ const Index = ({ id, onClose }) => {
             String(priceEl[1].value).replace(".", "").replace(",", ".")
         ).toFixed(2);
 
+        if (!price || isNaN(price)) return;
+
         const response = await api.post("/wallets", {
             price,
             type: 0,
@@ -273,6 +298,34 @@ const Index = ({ id, onClose }) => {
         }
     }
 
+    async function createAssetsContribution(task) {
+        selectedAssets.forEach(async (item) => {
+            await api.post("/assets-contributions", {
+                asset: item.asset.id,
+                quantity: parseFloat(item.quantity).toFixed(2),
+                createdAt: new Date(),
+                createdBy: me.id,
+                task,
+            });
+        });
+    }
+
+    async function updateAssetsContribution(task) {
+        selectedAssets.forEach(async (item) => {
+            if (item.id) return;
+
+            const response = await api.post("/assets-contributions", {
+                asset: item.asset.id,
+                quantity: parseFloat(item.quantity).toFixed(2),
+                createdAt: new Date(),
+                createdBy: me.id,
+                task,
+            });
+
+            console.log(response.data);
+        });
+    }
+
     async function create(data) {
         try {
             const createData = {
@@ -284,7 +337,9 @@ const Index = ({ id, onClose }) => {
                 wallet: await createMoneyContribution(),
             };
 
-            await Api.post("/tasks", createData);
+            const response = await Api.post("/tasks", createData);
+
+            await createAssetsContribution(response.data.id);
 
             selectedUsers.forEach((item) => {
                 Firebase.child("notifications").push(
@@ -307,6 +362,7 @@ const Index = ({ id, onClose }) => {
             onClose();
             setData(initalData);
             setSelectedUsers([]);
+            setSelectedAssets([]);
             Notification("success", "Tarefa cadastrada");
         } catch (error) {
             Error(error);
@@ -325,12 +381,15 @@ const Index = ({ id, onClose }) => {
 
             await Api.put(`/tasks/${data.id}`, data);
 
+            await updateAssetsContribution(data.id);
+
             handleUpdateNotifications(data);
 
             indexBoard();
             onClose();
             setData(initalData);
             setSelectedUsers([]);
+            setSelectedAssets([]);
             Notification("success", "Tarefa atualizada");
         } catch (error) {
             Error(error);
@@ -365,6 +424,7 @@ const Index = ({ id, onClose }) => {
             indexBoard();
             setData(initalData);
             setSelectedUsers([]);
+            setSelectedAssets([]);
             onClose();
             Notification("success", "Tarefa removido");
         } catch (error) {
@@ -547,11 +607,19 @@ const Index = ({ id, onClose }) => {
                 </FormItem>
 
                 <Row>
-                    <MoneyIn show={System.isAdmin()} md="4">
+                    <MoneyIn
+                        show={
+                            (data.wallet &&
+                                Object.keys(data.wallet).length !== 0) ||
+                            System.isAdmin()
+                        }
+                        md="4"
+                    >
                         <Input
                             label="Contribuição financeira"
                             type="text"
                             name="money-contribution"
+                            readOnly={!System.isAdmin()}
                         />
                     </MoneyIn>
                     <FormItem className="d-flex justify-content-end">
@@ -561,6 +629,15 @@ const Index = ({ id, onClose }) => {
                             onChange={(value) => {
                                 setCreateEvent(value);
                             }}
+                        />
+                    </FormItem>
+                </Row>
+
+                <Row>
+                    <FormItem>
+                        <SelectAssets
+                            value={selectedAssets}
+                            onChange={setSelectedAssets}
                         />
                     </FormItem>
                 </Row>
