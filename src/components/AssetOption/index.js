@@ -56,12 +56,7 @@ function Index({
                 </label>
 
                 <label>
-                    Quantidade{" "}
-                    <span>
-                        {Mask(parseFloat(quantity).toFixed(2), "##0,00", {
-                            reverse: true,
-                        })}
-                    </span>
+                    Quantidade <span>{quantity}</span>
                 </label>
 
                 <label>

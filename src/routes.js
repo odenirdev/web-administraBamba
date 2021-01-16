@@ -14,6 +14,7 @@ import ResetPassword from "./pages/ResetPassword";
 import Conversations from "./pages/Conversations";
 import Assets from "./pages/Assets";
 import Wallet from "./pages/Wallet";
+import InventoryMovement from "./pages/InventoryMovement";
 
 import AuthContext from "./components/AuthContext";
 
@@ -72,6 +73,11 @@ const Index = () => {
                 />
                 <Authenticated exact path="/assets" component={Assets} />
                 <Authenticated exact path="/wallet" component={Wallet} />
+                <Authenticated
+                    exact
+                    path="/inventory-movements"
+                    component={InventoryMovement}
+                />
             </Switch>
         </BrowserRouter>
     );

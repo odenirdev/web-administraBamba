@@ -64,7 +64,7 @@ function Index() {
             >
                 <Container>
                     <Row>
-                        <Col md="8">
+                        <Col md="8" className="p-0">
                             <Assets />
                         </Col>
                         <Col md="4">

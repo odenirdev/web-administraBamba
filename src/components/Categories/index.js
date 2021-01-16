@@ -1,5 +1,5 @@
 import React, { useState, useContext } from "react";
-import { FaFolder } from "react-icons/fa";
+import { FaFolder, FaTag, FaCaretDown, FaCaretUp } from "react-icons/fa";
 
 import Table, { ResponsiveTable } from "../Table";
 import AddButton from "../AddButton";
@@ -13,6 +13,8 @@ import { Container } from "./styles";
 
 function Index() {
     const [show, setShow] = useState(false);
+
+    const [showTable, setShowTable] = useState(false);
 
     const { data, index } = useContext(Context);
 
@@ -64,10 +66,22 @@ function Index() {
             </Modal>
             <Container>
                 <header>
-                    <h1>Categorias</h1>
-                    <AddButton onClick={handleAddModal} />
+                    <div
+                        onClick={() => {
+                            setShowTable(!showTable);
+                        }}
+                    >
+                        <h1>Categorias</h1>
+
+                        {showTable ? <FaCaretUp /> : <FaCaretDown />}
+                    </div>
+                    <AddButton
+                        onClick={handleAddModal}
+                        Icon={FaTag}
+                        title="Cadastrar Categoria"
+                    />
                 </header>
-                {data.length !== 0 && (
+                {data.length !== 0 && showTable && (
                     <ResponsiveTable>
                         <Table>
                             <thead>

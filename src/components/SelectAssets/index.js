@@ -3,6 +3,7 @@ import { FaAngleDown, FaAngleUp } from "react-icons/fa";
 
 import { Error } from "../../modules/notifications";
 import System from "../../modules/system";
+import { Mask } from "../../modules/formatter";
 
 import AssetOption from "../AssetOption";
 import AssetSelected from "../AssetSelected";
@@ -32,16 +33,32 @@ function Index({ value, onChange }) {
                         id,
                         name,
                         category: { name: category },
-                        quantity,
                         unit_of_measurement: { name: unitName, abbr: unitAbbr },
+                        inventory_movements,
                     } = asset;
+
+                    let totalQuantity = 0;
+
+                    inventory_movements.forEach((movement) => {
+                        if (movement.type) {
+                            totalQuantity += movement.quantity;
+                        } else {
+                            totalQuantity -= movement.quantity;
+                        }
+                    });
+
+                    const quantity = `${
+                        Math.sign(totalQuantity) < 0 ? "- " : ""
+                    }${Mask(parseFloat(totalQuantity).toFixed(2), "##0,00", {
+                        reverse: true,
+                    })}`;
 
                     return {
                         id,
                         name,
                         category,
-                        unitOfMeasurement: unitAbbr ? unitAbbr : unitName,
                         quantity,
+                        unitOfMeasurement: unitAbbr ? unitAbbr : unitName,
                         image: asset.images[0],
                     };
                 });
@@ -89,6 +106,7 @@ function Index({ value, onChange }) {
                                 value,
                                 index,
                             }}
+                            inventory_movement={item.inventory_movement}
                         />
                     </li>
                 ))}

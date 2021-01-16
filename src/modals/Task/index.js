@@ -145,6 +145,8 @@ const Index = ({ id, onClose }) => {
             showTask();
         } else {
             setData(initalData);
+
+            $("input[name=money-contribution]").val("");
             setSelectedAssets([]);
             setSelectedUsers([]);
         }
@@ -300,29 +302,51 @@ const Index = ({ id, onClose }) => {
 
     async function createAssetsContribution(task) {
         selectedAssets.forEach(async (item) => {
+            if (parseFloat(item.quantity) === 0) return;
+
+            const {
+                data: { id: inventory_movement },
+            } = await api.post("/inventory-movements", {
+                asset: item.asset.id,
+                type: false,
+                quantity: parseFloat(item.quantity).toFixed(2),
+                createdAt: new Date(),
+                createdBy: me.id,
+            });
+
             await api.post("/assets-contributions", {
                 asset: item.asset.id,
                 quantity: parseFloat(item.quantity).toFixed(2),
                 createdAt: new Date(),
                 createdBy: me.id,
                 task,
+                inventory_movement,
             });
         });
     }
 
     async function updateAssetsContribution(task) {
         selectedAssets.forEach(async (item) => {
-            if (item.id) return;
+            if (item.id || parseFloat(item.quantity) === 0) return;
 
-            const response = await api.post("/assets-contributions", {
+            const {
+                data: { id: inventory_movement },
+            } = await api.post("/inventory-movements", {
+                asset: item.asset.id,
+                type: false,
+                quantity: parseFloat(item.quantity).toFixed(2),
+                createdAt: new Date(),
+                createdBy: me.id,
+            });
+
+            await api.post("/assets-contributions", {
                 asset: item.asset.id,
                 quantity: parseFloat(item.quantity).toFixed(2),
                 createdAt: new Date(),
                 createdBy: me.id,
                 task,
+                inventory_movement,
             });
-
-            console.log(response.data);
         });
     }
 

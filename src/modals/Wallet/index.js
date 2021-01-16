@@ -169,7 +169,7 @@ function Index({ type, onClose, selectedWallet, reload }) {
         });
     }
 
-    function handleUpdateValidation() {
+    function handleUpdateValidation(data) {
         if (
             Mask(parseFloat(data.price).toFixed(2), "#.##0,00", {
                 reverse: true,
@@ -183,17 +183,19 @@ function Index({ type, onClose, selectedWallet, reload }) {
                     .slice(0, 16) &&
             data.reason === selectedWallet.reason
         ) {
-            return true;
+            return false;
         }
 
-        return false;
+        return true;
     }
 
     async function update(data) {
         try {
-            if (!handleUpdateValidation()) {
+            if (!handleUpdateValidation(data)) {
                 return;
             }
+
+            console.log("here");
 
             await api.put(`/wallets/${data.id}`, data);
 

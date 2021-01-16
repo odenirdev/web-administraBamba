@@ -1,7 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
 import { Row, Col } from "react-bootstrap";
-import $ from "jquery";
-import "jquery-mask-plugin";
 import { File } from "react-og-forms";
 import { FaEdit, FaTrash, FaPaperPlane } from "react-icons/fa";
 
@@ -33,60 +31,55 @@ function Index({ selected, onClose, index }) {
     });
 
     useEffect(() => {
-        $("#cost").mask("#.##0,00", { reverse: true });
-        $("#quantity").mask("##0,00", { reverse: true });
-    }, []);
+        async function show() {
+            try {
+                if (!selected) {
+                    setData({
+                        name: "",
+                        category: "",
+                        description: "",
+                        unit_of_measurement: "",
+                        images: [],
+                    });
+                } else {
+                    const response = await api.get(`/assets/${selected}`);
 
-    useEffect(() => {
-        if (Object.keys(selected).length === 0) {
-            setData({
-                name: "",
-                category: "",
-                description: "",
-                quantity: "",
-                unit_of_measurement: "",
-                cost: "",
-                images: [],
-            });
-        } else {
-            const serializedImages = selected.images.map((image) => ({
-                ...image,
-                preview: `${api.defaults.baseURL}${image.url}`,
-            }));
+                    const { data } = response;
 
-            setData({
-                ...selected,
-                images: serializedImages,
-                category: selected.category.id,
-                unit_of_measurement: selected.unit_of_measurement.id,
-            });
+                    const {
+                        id,
+                        name,
+                        description,
+                        category: { id: category },
+                        unit_of_measurement: { id: unit_of_measurement },
+                        images,
+                    } = data;
 
-            $("#quantity").val(
-                $("#quantity").masked(parseFloat(selected.quantity).toFixed(2))
-            );
-            $("#cost").val(
-                $("#cost").masked(parseFloat(selected.cost).toFixed(2))
-            );
+                    const serializedImages = images.map((image) => ({
+                        ...image,
+                        preview: `${api.defaults.baseURL}${image.url}`,
+                    }));
+
+                    setData({
+                        id,
+                        name,
+                        description,
+                        category,
+                        unit_of_measurement,
+                        images: serializedImages,
+                    });
+                }
+            } catch (error) {
+                Error(error);
+            }
         }
+
+        show();
     }, [selected]);
-
-    function serializerData() {
-        const cost = parseFloat(
-            String(document.querySelector("#cost").value)
-                .replace(".", "")
-                .replace(",", ".")
-        ).toFixed(2);
-
-        const quantity = parseFloat(
-            String(document.querySelector("#quantity").value).replace(",", ".")
-        ).toFixed(2);
-
-        return { ...data, cost, quantity };
-    }
 
     async function create() {
         try {
-            await api.post("/assets", serializerData());
+            await api.post("/assets", data);
 
             notification("success", "Átivo cadastrado");
         } catch (error) {
@@ -96,7 +89,7 @@ function Index({ selected, onClose, index }) {
 
     async function update() {
         try {
-            await api.put(`/assets/${data.id}`, serializerData());
+            await api.put(`/assets/${data.id}`, data);
 
             notification("success", "Átivo alterado");
         } catch (error) {
@@ -116,10 +109,34 @@ function Index({ selected, onClose, index }) {
         }
     }
 
+    function handleValidate() {
+        if (!data.name) {
+            return { status: false, message: "Nome é obrigatório" };
+        }
+
+        if (!data.category) {
+            return { status: false, message: "Categoria é obrigatório" };
+        }
+
+        if (!data.unit_of_measurement) {
+            return {
+                status: false,
+                message: "Unidade de Medida é obrigatório",
+            };
+        }
+
+        return { status: true };
+    }
+
     async function handleSubmit(e) {
         e.preventDefault();
 
-        if (Object.keys(selected).length === 0) {
+        const validate = handleValidate();
+        if (!validate.status) {
+            return notification("warning", validate.message);
+        }
+
+        if (!selected) {
             await create();
         } else {
             await update();
@@ -170,7 +187,7 @@ function Index({ selected, onClose, index }) {
                 </div>
             </Col>
             <Row>
-                <Col md="6">
+                <Col md="4">
                     <Input
                         label="Nome*"
                         value={data.name}
@@ -179,7 +196,7 @@ function Index({ selected, onClose, index }) {
                         }}
                     />
                 </Col>
-                <Col md="6">
+                <Col md="4">
                     <Select
                         label="Categoria*"
                         value={data.category}
@@ -194,20 +211,6 @@ function Index({ selected, onClose, index }) {
                             </option>
                         ))}
                     </Select>
-                </Col>
-            </Row>
-            <Col md="12">
-                <TextArea
-                    label="Descrição"
-                    value={data.description}
-                    onChange={(e) => {
-                        setData({ ...data, description: e.target.value });
-                    }}
-                />
-            </Col>
-            <Row>
-                <Col md="4">
-                    <Input label="Quantidade*" id="quantity" />
                 </Col>
                 <Col md="4">
                     <Select
@@ -228,10 +231,17 @@ function Index({ selected, onClose, index }) {
                         ))}
                     </Select>
                 </Col>
-                <Col md="4">
-                    <Input label="Custo" id="cost" />
-                </Col>
             </Row>
+            <Col md="12">
+                <TextArea
+                    label="Descrição"
+                    value={data.description}
+                    onChange={(e) => {
+                        setData({ ...data, description: e.target.value });
+                    }}
+                />
+            </Col>
+
             <ButtonsGrid>
                 {Object.keys(selected).length === 0 ? (
                     <Button type="submit">
