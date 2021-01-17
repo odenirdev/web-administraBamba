@@ -29,9 +29,7 @@ function Index() {
 
     const [unitOfMeasurementData, setUnitOfMeasurementData] = useState([]);
 
-    const [beginDate, setBeginDate] = useState("");
-
-    const [endDate, setEndDate] = useState("");
+    const [filters, setFilters] = useState({ begin: "", end: "" });
 
     useEffect(() => {
         async function indexUnitOfMensurement() {
@@ -104,9 +102,18 @@ function Index() {
     const index = useCallback(() => {
         async function index() {
             try {
-                const { data } = await api.get(
-                    "/inventory-movements?_limit=-1&deleted=false&_sort=createdAt:DESC"
-                );
+                let endPoint =
+                    "/inventory-movements?_limit=-1&_sort=createdAt:DESC&deleted=false";
+
+                if (filters.begin) {
+                    endPoint += `&createdAt_gte=${filters.begin}`;
+                }
+
+                if (filters.end) {
+                    endPoint += `&createdAt_lte=${filters.end}T23:59:59`;
+                }
+
+                const { data } = await api.get(endPoint);
 
                 const serializedData = data.map((item) => {
                     const {
@@ -153,7 +160,7 @@ function Index() {
         }
 
         index();
-    }, [setReactComponentinTable, unitOfMeasurement]);
+    }, [setReactComponentinTable, unitOfMeasurement, filters]);
 
     useEffect(() => {
         index();
@@ -186,7 +193,36 @@ function Index() {
                 <Container>
                     <header>
                         <h1>Movimentações de Estoque</h1>
-
+                        <Row>
+                            <Col>
+                                <Input
+                                    type="date"
+                                    name="begin"
+                                    label="Início"
+                                    value={filters.begin}
+                                    onChange={(e) => {
+                                        setFilters({
+                                            ...filters,
+                                            begin: e.target.value,
+                                        });
+                                    }}
+                                />
+                            </Col>
+                            <Col>
+                                <Input
+                                    type="date"
+                                    name="end"
+                                    label="Fim"
+                                    value={filters.end}
+                                    onChange={(e) => {
+                                        setFilters({
+                                            ...filters,
+                                            end: e.target.value,
+                                        });
+                                    }}
+                                />
+                            </Col>
+                        </Row>
                         <div>
                             <AddButton
                                 Icon={FaDollyFlatbed}

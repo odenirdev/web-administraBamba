@@ -209,7 +209,7 @@ const Index = ({ user, updateUsers, onClose }) => {
                                                 `/upload/files/${data.image.id}`
                                             );
 
-                                            await Api.put(`/user/${data.id}`, {
+                                            await Api.put(`/users/${data.id}`, {
                                                 image: {},
                                             });
                                         }

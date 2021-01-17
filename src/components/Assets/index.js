@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from "react";
 import ReactDOM from "react-dom";
 import { useHistory } from "react-router-dom";
 import { FaFolder, FaBox, FaDollyFlatbed } from "react-icons/fa";
-import { Row } from "react-bootstrap";
 
 import { Container } from "./styles";
 
@@ -10,6 +9,7 @@ import Table, { ResponsiveTable } from "../../components/Table";
 
 import { Error } from "../../modules/notifications";
 import DataTables from "../../modules/datatables";
+import { Mask } from "../../modules/formatter";
 
 import Assets from "../../modals/Assets";
 
@@ -72,12 +72,34 @@ function Index() {
                         id,
                         name,
                         category: { name: category },
+                        inventory_movements,
                     } = asset;
+
+                    let totalQuantity = 0;
+
+                    inventory_movements.forEach((movement) => {
+                        if (movement.type) {
+                            totalQuantity += movement.quantity;
+                        } else {
+                            totalQuantity -= movement.quantity;
+                        }
+                    });
+
+                    const unit_of_measurement = asset.unit_of_measurement.abbr
+                        ? asset.unit_of_measurement.abbr
+                        : asset.unit_of_measurement.name;
+
+                    const quantity = `${
+                        Math.sign(totalQuantity) < 0 ? "- " : ""
+                    }${Mask(parseFloat(totalQuantity).toFixed(2), "##0,00", {
+                        reverse: true,
+                    })} ${unit_of_measurement}`;
 
                     return {
                         id,
                         name,
                         category: category || "",
+                        quantity,
                         open: `<div class="editar" data-id="${id}" id="editar-${id}"></div>`,
                     };
                 });
@@ -88,6 +110,7 @@ function Index() {
                     [
                         { title: "Nome", data: "name" },
                         { title: "Categoria", data: "category" },
+                        { title: "Quantidade", data: "quantity" },
                         { title: "Abrir", data: "open" },
                     ],
                     () => {

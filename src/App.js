@@ -6,8 +6,6 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import AuthContext from "./components/AuthContext";
 import ConversationsContext from "./components/Conversations/context";
 
-import { Error } from "./modules/notifications";
-
 import Api from "./services/api";
 import Firebase from "./services/firebase";
 
@@ -30,7 +28,6 @@ const App = () => {
 
                 setAuth({ isAuthenticated: true, me: response.data });
             } catch (error) {
-                Error(error);
                 return setAuth({ isAuthenticated: false });
             }
         }

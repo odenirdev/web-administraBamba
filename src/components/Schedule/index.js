@@ -35,6 +35,7 @@ function Index() {
     const {
         auth: { me },
     } = useContext(AuthContext);
+
     const { index, events } = useContext(ScheduleContext);
 
     useEffect(() => {

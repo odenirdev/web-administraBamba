@@ -163,7 +163,11 @@ h4 {
 }
 
 .e-content-wrap {
-    height: auto !important;
+    min-height: 70vh !important;
+}
+
+.e-time-zone {
+    display: none;
 }
 
 .e-schedule .e-month-view .e-current-date .e-date-header,

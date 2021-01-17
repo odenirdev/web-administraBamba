@@ -151,20 +151,20 @@ const Index = () => {
     useEffect(() => {
         async function show() {
             try {
-                const response = await Api.get("/users/me");
+                if (!Object.keys(me).length) return;
 
-                if (response.data.image.url) {
-                    setImage(Api.defaults.baseURL + response.data.image.url);
+                if (me.image.url) {
+                    setImage(Api.defaults.baseURL + me.image.url);
                 }
 
-                setUser(response.data);
+                setUser(me);
             } catch (error) {
                 Error(error);
             }
         }
 
         show();
-    }, []);
+    }, [me]);
 
     return (
         <>

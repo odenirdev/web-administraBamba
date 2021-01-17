@@ -5,9 +5,17 @@ export const Container = styled.div`
 
     form {
         width: 100%;
-        max-width: 480px;
+        max-width: 600px;
 
         margin: 0 auto;
+
+        [class*="col-"] {
+            padding-left: 0;
+        }
+
+        [class*="col-"]:last-child {
+            padding-right: 0;
+        }
     }
 
     .row {

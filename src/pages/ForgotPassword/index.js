@@ -5,11 +5,12 @@ import { FaPaperPlane } from "react-icons/fa";
 import { useHistory } from "react-router-dom";
 
 import Passista from "../../assets/images/Passista.png";
-import LogoImg from "../../assets/images/Logo.png";
+import LogoImg from "../../assets/images/adsamba-logo.png";
 
 import Form, { GridButtons } from "../../components/Form";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
+import Img from "../../components/Img";
 
 import Notification, { Error } from "../../modules/notifications";
 import Api, { requestPublic } from "../../services/api";
@@ -20,6 +21,25 @@ const Background = Styled.div`
     background-image: url(${Passista});
     background-repeat: no-repeat;
     background-size: cover;
+`;
+
+const Container = Styled.div`
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 400px;
+    height: 100vh;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+
+    padding: 0 3rem;
+
+    @media (max-width: 750px) {
+        width: 100%;
+    }
 `;
 
 const Header = Styled.header`
@@ -37,28 +57,10 @@ const Header = Styled.header`
     }
 `;
 
-const Logo = Styled.img`
-    width: 64px;
-    height: 64px;
-`;
-
-const Container = Styled.div`
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 400px;
-    height: 100vh;
-    background-color: var(--gray-3);
-
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-
-    padding: 0 1rem;
-
-    @media (max-width: 750px) {
-        width: 100%;
+const StyledForm = Styled(Form)`
+    & a {
+        color: var(--purple-1);
+        filter: brightness(110%);
     }
 `;
 
@@ -88,11 +90,10 @@ const Index = () => {
             <Container>
                 <Header>
                     <h1>
-                        <Logo src={LogoImg} />
-                        <span>AdministraBamba</span>
+                        <Img src={LogoImg} width="200px" />
                     </h1>
                 </Header>
-                <Form
+                <StyledForm
                     min-width="300px"
                     sm-min-width="260px"
                     onSubmit={handleSubmit}
@@ -114,7 +115,7 @@ const Index = () => {
                             </Button>
                         </GridButtons>
                     </Col>
-                </Form>
+                </StyledForm>
             </Container>
         </Background>
     );

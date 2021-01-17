@@ -10,10 +10,17 @@ export const Container = styled.div`
         justify-content: space-between;
         padding: 0.2rem;
         border-radius: 2px;
-        font-size: 1.5rem;
+
+        h1 {
+            font-size: 2.2rem;
+        }
 
         div {
             display: flex;
+
+            .col:first-child {
+                margin-right: 0.5rem;
+            }
         }
     }
 

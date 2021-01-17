@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useCallback } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Col, Row } from "react-bootstrap";
 import { FaPaperPlane, FaTrash, FaEdit } from "react-icons/fa";
 import $ from "jquery";
@@ -6,7 +6,7 @@ import "jquery-mask-plugin";
 
 import { Container } from "./styles";
 
-import Form, { Input, TextArea } from "../../components/Form";
+import Form, { Input, TextArea, Select } from "../../components/Form";
 import Button from "../../components/Button";
 
 import AuthContext from "../../components/AuthContext";
@@ -16,20 +16,24 @@ import { fDate, Mask } from "../../modules/formatter";
 
 import api from "../../services/api";
 
-function Index({ type, onClose, selectedWallet, reload }) {
+import EmptyImage from "../../assets/images/empty.jpg";
+
+function Index({ onClose, selectedWallet, reload }) {
     const {
         auth: { me },
     } = useContext(AuthContext);
 
     const [data, setData] = useState({});
 
+    const [oldData, setOldData] = useState({});
+
     const [movementHistory, setMovementHistory] = useState([]);
 
-    const indexWalletLogs = useCallback(() => {
+    useEffect(() => {
         async function indexWalletLogs() {
             try {
                 const response = await api.get(
-                    `/wallet-logs?_limit=-1&wallet=${data.id}&_sort=id:DESC`
+                    `/wallet-logs?_limit=-1&wallet=${selectedWallet}&_sort=id:DESC`
                 );
 
                 setMovementHistory(response.data);
@@ -38,29 +42,40 @@ function Index({ type, onClose, selectedWallet, reload }) {
             }
         }
 
-        if (data.id) indexWalletLogs();
-    }, [data.id]);
+        if (selectedWallet) indexWalletLogs();
+    }, [selectedWallet]);
 
     useEffect(() => {
         $("input[name=price]").mask("#.##0,00", { reverse: true });
     }, []);
 
     useEffect(() => {
-        if (!(Object.keys(selectedWallet).length === 0)) {
-            document.querySelector("input[name=price]").value = $(
-                "input[name=price]"
-            ).masked(parseFloat(selectedWallet.price).toFixed(2));
+        async function show() {
+            try {
+                const { data } = await api.get(`/wallets/${selectedWallet}`);
 
-            setData({
-                ...selectedWallet,
-                createdAt: fDate(selectedWallet.createdAt, "local-datetime"),
-            });
+                document.querySelector("input[name=price]").value = $(
+                    "input[name=price]"
+                ).masked(parseFloat(data.price).toFixed(2));
 
-            indexWalletLogs();
+                const serializedData = {
+                    ...data,
+                    createdAt: fDate(data.createdAt, "local-datetime"),
+                };
+
+                setOldData(serializedData);
+                setData(serializedData);
+            } catch (error) {
+                Error(error);
+            }
+        }
+
+        if (selectedWallet) {
+            show();
         } else {
             clearData();
         }
-    }, [indexWalletLogs, selectedWallet]);
+    }, [selectedWallet]);
 
     function handleOnChange(event) {
         const { name, value } = event.currentTarget;
@@ -74,6 +89,7 @@ function Index({ type, onClose, selectedWallet, reload }) {
         setData({
             createdAt: "",
             reason: "",
+            type: "",
         });
     }
 
@@ -86,11 +102,14 @@ function Index({ type, onClose, selectedWallet, reload }) {
         return {
             ...data,
             price,
-            type,
         };
     }
 
     function handleValidate(data) {
+        if (data.type === "") {
+            return { status: false, message: "Tipo é obrigatório" };
+        }
+
         if (data.price === "NaN") {
             return { status: false, message: "Valor é obrigatório" };
         }
@@ -115,95 +134,89 @@ function Index({ type, onClose, selectedWallet, reload }) {
 
             notification(
                 "success",
-                `${type === 1 ? "Entrada" : "Saída"} de dinheiro concluída`
+                `${data.type === 1 ? "Entrada" : "Saída"} de dinheiro concluída`
             );
         } catch (error) {
             Error(error);
         }
     }
 
-    async function handleLogUpdate(data) {
-        let text = "";
-
-        if (
-            Mask(parseFloat(data.price).toFixed(2), "#.##0,00", {
-                reverse: true,
-            }) !==
-            Mask(parseFloat(selectedWallet.price).toFixed(2), "#.##0,00", {
-                reverse: true,
-            })
-        ) {
-            text = `alterou o valor de R$ ${Mask(
-                parseFloat(selectedWallet.price).toFixed(2),
-                "#.##0,00",
-                { reverse: true }
-            )} para ${Mask(parseFloat(data.price).toFixed(2), "#.##0,00", {
-                reverse: true,
-            })}`;
-        }
-
-        if (
-            new Date(data.createdAt).toLocaleString().slice(0, 16) !==
-            new Date(selectedWallet.createdAt).toLocaleString().slice(0, 16)
-        ) {
-            text += `${
-                text ? " e " : ""
-            }altorou a data e o horário de ${new Date(selectedWallet.createdAt)
-                .toLocaleString()
-                .slice(0, 16)} para ${new Date(data.createdAt)
-                .toLocaleString()
-                .slice(0, 16)}`;
-        }
-
-        if (data.reason !== selectedWallet.reason) {
-            text += `${text ? " e " : ""}altorou o motivo de "${
-                selectedWallet.reason
-            }" para "${data.reason}"`;
-        }
-
+    async function handleLogUpdate(text) {
         await api.post("/wallet-logs", {
             createdBy: me.id,
             createdAt: new Date(),
-            wallet: data.id,
+            wallet: selectedWallet,
             text,
         });
     }
 
     function handleUpdateValidation(data) {
-        if (
-            Mask(parseFloat(data.price).toFixed(2), "#.##0,00", {
-                reverse: true,
-            }) ===
-                Mask(parseFloat(selectedWallet.price).toFixed(2), "#.##0,00", {
-                    reverse: true,
-                }) &&
-            new Date(data.createdAt).toLocaleString().slice(0, 16) ===
-                new Date(selectedWallet.createdAt)
-                    .toLocaleString()
-                    .slice(0, 16) &&
-            data.reason === selectedWallet.reason
-        ) {
-            return false;
+        let response = { status: false, message: "" };
+
+        const type = parseInt(data.type);
+        const oldType = parseInt(oldData.type);
+        if (type !== oldType) {
+            response.status = true;
+            response.message = `alterou o tipo de ${
+                oldType === 1 ? "Entrada" : "Saída"
+            } para ${type === 1 ? "Entrada" : "Saída"}`;
         }
 
-        return true;
+        const price = Mask(parseFloat(data.price).toFixed(2), "#.##0,00", {
+            reverse: true,
+        });
+        const oldPrice = Mask(
+            parseFloat(oldData.price).toFixed(2),
+            "#.##0,00",
+            {
+                reverse: true,
+            }
+        );
+        if (price !== oldPrice) {
+            response.status = true;
+            response.message += `${
+                response.message ? " e " : ""
+            }alterou o valor de ${oldPrice} para ${price}`;
+        }
+
+        const createdAt = new Date(data.createdAt)
+            .toLocaleString()
+            .slice(0, 16);
+        const oldCreatedAt = new Date(oldData.createdAt)
+            .toLocaleString()
+            .slice(0, 16);
+        if (createdAt !== oldCreatedAt) {
+            response.status = true;
+            response.message += `${
+                response.message ? " e " : ""
+            }alterou a data e a hora de ${oldCreatedAt} para ${createdAt}`;
+        }
+
+        if (data.reason !== oldData.reason) {
+            response.status = true;
+            response.message += `${
+                response.message ? " e " : ""
+            }alterou o motivo de "${oldData.reason}" para "${data.reason}"`;
+        }
+
+        return response;
     }
 
     async function update(data) {
         try {
-            if (!handleUpdateValidation(data)) {
+            const validate = handleUpdateValidation(data);
+            if (!validate.status) {
                 return;
             }
-
-            console.log("here");
-
             await api.put(`/wallets/${data.id}`, data);
 
-            await handleLogUpdate(data);
+            await handleLogUpdate(validate.message);
 
             notification(
                 "success",
-                `${type === 1 ? "Entrada" : "Saída"} de dinheiro atualizado`
+                `${
+                    data.type === 1 ? "Entrada" : "Saída"
+                } de dinheiro atualizado`
             );
         } catch (error) {
             Error(error);
@@ -216,7 +229,7 @@ function Index({ type, onClose, selectedWallet, reload }) {
 
             notification(
                 "success",
-                `${type === 1 ? "Entrada" : "Saída"} de dinheiro removida`
+                `${data.type === 1 ? "Entrada" : "Saída"} de dinheiro removida`
             );
 
             reload();
@@ -251,13 +264,25 @@ function Index({ type, onClose, selectedWallet, reload }) {
         <Container>
             <Form onSubmit={handleSubmit}>
                 <Row>
-                    <Col>
+                    <Col md="3">
+                        <Select
+                            label="Tipo*"
+                            name="type"
+                            value={data.type}
+                            onChange={handleOnChange}
+                        >
+                            <option value="">Selecione...</option>
+                            <option value={1}>Entrada</option>
+                            <option value={0}>Saída</option>
+                        </Select>
+                    </Col>
+                    <Col md="3">
                         <Input type="text" label="Valor*" name="price" />
                     </Col>
-                    <Col>
+                    <Col md="6">
                         <Input
                             type="datetime-local"
-                            label="Data e Horário*"
+                            label="Data e Hora*"
                             name="createdAt"
                             value={data.createdAt}
                             onChange={handleOnChange}
@@ -280,7 +305,13 @@ function Index({ type, onClose, selectedWallet, reload }) {
                                     <div>
                                         <p>
                                             <img
-                                                src={`${api.defaults.baseURL}${movement.createdBy.image.url}`}
+                                                src={
+                                                    !!Object.keys(
+                                                        data.createdBy.image
+                                                    ).length
+                                                        ? `${api.defaults.baseURL}${data.createdBy.image.url}`
+                                                        : EmptyImage
+                                                }
                                                 alt="Creator of movement"
                                             />{" "}
                                             <strong>
@@ -300,7 +331,12 @@ function Index({ type, onClose, selectedWallet, reload }) {
                             <div>
                                 <p>
                                     <img
-                                        src={`${api.defaults.baseURL}${data.createdBy.image.url}`}
+                                        src={
+                                            !!Object.keys(data.createdBy.image)
+                                                .length
+                                                ? `${api.defaults.baseURL}${data.createdBy.image.url}`
+                                                : EmptyImage
+                                        }
                                         alt="Creator of movement"
                                     />{" "}
                                     <strong>{data.createdBy.username}</strong>{" "}

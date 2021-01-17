@@ -15,6 +15,7 @@ import Conversations from "./pages/Conversations";
 import Assets from "./pages/Assets";
 import Wallet from "./pages/Wallet";
 import InventoryMovement from "./pages/InventoryMovement";
+import Schedule from "./pages/Schedule";
 
 import AuthContext from "./components/AuthContext";
 
@@ -78,6 +79,7 @@ const Index = () => {
                     path="/inventory-movements"
                     component={InventoryMovement}
                 />
+                <Authenticated exact path="/schedule" component={Schedule} />
             </Switch>
         </BrowserRouter>
     );

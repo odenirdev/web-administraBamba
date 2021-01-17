@@ -1,20 +1,18 @@
 import React, { useCallback, useEffect, useState } from "react";
-import {
-    FaMoneyBillWave,
-    FaPlus,
-    FaMinus,
-    FaCalendarWeek,
-    FaFolder,
-} from "react-icons/fa";
+import ReactDOM from "react-dom";
+import { FaMoneyBillWave, FaPlus, FaMinus, FaFolder } from "react-icons/fa";
 import { Row, Col } from "react-bootstrap";
 
 import NavbarContainer from "../../components/Container";
 import Tooltip from "../../components/Tooltip";
 import Modal from "../../components/Modal";
-import { ResponsiveTable } from "../../components/Table";
+import Table, { ResponsiveTable } from "../../components/Table";
+import CicleButton from "../../components/AddButton";
+import { Input } from "../../components/Form";
 
 import { Error } from "../../modules/notifications";
 import { Mask } from "../../modules/formatter";
+import DataTables from "../../modules/datatables";
 
 import api from "../../services/api";
 
@@ -27,8 +25,6 @@ function Index() {
 
     const [title, setTitle] = useState("");
 
-    const [type, setType] = useState(0);
-
     const [total, setTotal] = useState(0);
 
     const [moneyIn, setMoneyIn] = useState(0);
@@ -37,14 +33,28 @@ function Index() {
 
     const [data, setData] = useState([]);
 
-    const [selectedWallet, setSelectedWallet] = useState({});
+    const [filters, setFilters] = useState({
+        begin: "",
+        end: "",
+    });
+
+    const [selectedWallet, setSelectedWallet] = useState("");
 
     const index = useCallback(() => {
         async function index() {
             try {
-                const response = await api.get(
-                    "/wallets?_limit=-1&deleted=false&_sort=id:desc"
-                );
+                let endPoint =
+                    "/wallets?_limit=-1&_sort=createdAt:DESC&deleted=false";
+
+                if (filters.begin) {
+                    endPoint += `&createdAt_gte=${filters.begin}`;
+                }
+
+                if (filters.end) {
+                    endPoint += `&createdAt_lte=${filters.end}T23:59:59`;
+                }
+
+                const response = await api.get(endPoint);
 
                 setData(response.data);
             } catch (error) {
@@ -53,7 +63,7 @@ function Index() {
         }
 
         index();
-    }, []);
+    }, [filters.begin, filters.end]);
 
     const calcWallet = useCallback(() => {
         function calcWalletTotal() {
@@ -97,30 +107,90 @@ function Index() {
         calcWallet();
     }, [calcWallet]);
 
-    function handleMoneyIn() {
-        setShow(true);
-        setTitle("Entrada de dinheiro");
-        setType(1);
-        setSelectedWallet({});
-    }
+    const setReactComponentinTable = useCallback(() => {
+        const handleEdit = (id) => {
+            setSelectedWallet(id);
+            setTitle("Movimentação");
+            setShow(true);
+        };
 
-    function handleMoneyOut() {
-        setShow(true);
-        setTitle("Saída de dinheiro");
-        setType(0);
-        setSelectedWallet({});
-    }
+        const setReactComponentinTable = () => {
+            const editarEls = document.querySelectorAll(".editar");
 
-    function handleOpenModal(item) {
+            for (const editarEl of editarEls) {
+                ReactDOM.render(
+                    <FaFolder
+                        className="open-icon"
+                        onClick={() => {
+                            handleEdit(editarEl.dataset.id);
+                        }}
+                    />,
+                    document.getElementById(editarEl.id)
+                );
+            }
+
+            const typeEls = document.querySelectorAll(".type");
+
+            for (const typeEl of typeEls) {
+                ReactDOM.render(
+                    typeEl.dataset.value === "1" ? (
+                        <FaPlus color="var(--green)" />
+                    ) : (
+                        <FaMinus color="var(--red)" />
+                    ),
+                    document.getElementById(typeEl.id)
+                );
+            }
+        };
+
+        setReactComponentinTable();
+    }, []);
+
+    useEffect(() => {
+        const serializedData = data.map((item) => {
+            const { id, type, price, createdAt } = item;
+
+            const formatPrice = Mask(parseFloat(price).toFixed(2), "#.##0,00", {
+                reverse: true,
+            });
+
+            const formatCreatedAt = new Date(createdAt)
+                .toLocaleString()
+                .slice(0, 16);
+
+            return {
+                id,
+                type: `<div class="type" data-value="${type}" id="type-${id}"></div>`,
+                price: formatPrice,
+                createdAt: formatCreatedAt,
+                open: `<div class="editar" data-id="${id}" id="editar-${id}"></div>`,
+            };
+        });
+
+        DataTables(
+            "#wallet-table",
+            serializedData,
+            [
+                { title: "Tipo", data: "type" },
+                { title: "Valor", data: "price" },
+                { title: "Data", data: "createdAt" },
+                { title: "Abrir", data: "open" },
+            ],
+            () => {
+                setReactComponentinTable();
+            }
+        );
+    }, [data, setReactComponentinTable]);
+
+    function handleAddMovement() {
         setShow(true);
-        setTitle("Movimentação");
-        setType(item.type);
-        setSelectedWallet(item);
+        setTitle("Nova Movimentação");
+        setSelectedWallet("");
     }
 
     const handleCloseModal = () => {
         setShow(false);
-        setSelectedWallet({});
+        setSelectedWallet("");
     };
 
     return (
@@ -128,7 +198,6 @@ function Index() {
             <Modal title={title} show={show} onClose={handleCloseModal}>
                 <WalletModal
                     {...{
-                        type,
                         onClose: handleCloseModal,
                         selectedWallet,
                         reload: index,
@@ -140,21 +209,42 @@ function Index() {
                     <header>
                         <h1>
                             Carteira
-                            <button
-                                className="money-in"
-                                onClick={handleMoneyIn}
-                            >
-                                <FaPlus />
-                                <FaMoneyBillWave />
-                            </button>
-                            <button
-                                className="money-out"
-                                onClick={handleMoneyOut}
-                            >
-                                <FaMinus />
-                                <FaMoneyBillWave />
-                            </button>
+                            <CicleButton
+                                Icon={FaMoneyBillWave}
+                                title="Cadastrar Movimentação"
+                                onClick={handleAddMovement}
+                            />
                         </h1>
+                        <Row>
+                            <Col>
+                                <Input
+                                    type="date"
+                                    name="begin"
+                                    label="Início"
+                                    value={filters.begin}
+                                    onChange={(e) => {
+                                        setFilters({
+                                            ...filters,
+                                            begin: e.target.value,
+                                        });
+                                    }}
+                                />
+                            </Col>
+                            <Col>
+                                <Input
+                                    type="date"
+                                    name="end"
+                                    label="Fim"
+                                    value={filters.end}
+                                    onChange={(e) => {
+                                        setFilters({
+                                            ...filters,
+                                            end: e.target.value,
+                                        });
+                                    }}
+                                />
+                            </Col>
+                        </Row>
                         <div>
                             <Tooltip
                                 background={
@@ -206,70 +296,9 @@ function Index() {
                     </header>
                     <section>
                         <Row>
-                            {data.length !== 0 && (
-                                <Col md={6}>
-                                    <ResponsiveTable>
-                                        <table>
-                                            <thead>
-                                                <tr>
-                                                    <th colSpan={4}>
-                                                        Movimentações
-                                                    </th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {data.map((item) => (
-                                                    <tr key={item.id}>
-                                                        <td
-                                                            className={
-                                                                item.type === 1
-                                                                    ? "money-in"
-                                                                    : "money-out"
-                                                            }
-                                                        >
-                                                            {item.type === 1 ? (
-                                                                <FaPlus />
-                                                            ) : (
-                                                                <FaMinus />
-                                                            )}
-                                                        </td>
-                                                        <td>
-                                                            R$
-                                                            {Mask(
-                                                                parseFloat(
-                                                                    item.price
-                                                                ).toFixed(2),
-                                                                "#.##0,00",
-                                                                {
-                                                                    reverse: true,
-                                                                }
-                                                            )}
-                                                        </td>
-                                                        <td>
-                                                            <FaCalendarWeek className="mr-1" />
-                                                            {String(
-                                                                new Date(
-                                                                    item.createdAt
-                                                                ).toLocaleString()
-                                                            ).slice(0, 16)}
-                                                        </td>
-                                                        <td className="d-flex justify-content-center">
-                                                            <FaFolder
-                                                                className="open-icon"
-                                                                onClick={() => {
-                                                                    handleOpenModal(
-                                                                        item
-                                                                    );
-                                                                }}
-                                                            />
-                                                        </td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
-                                    </ResponsiveTable>
-                                </Col>
-                            )}
+                            <ResponsiveTable>
+                                <Table id="wallet-table" />
+                            </ResponsiveTable>
                         </Row>
                     </section>
                 </Container>

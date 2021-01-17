@@ -13,6 +13,8 @@ import notifications, { Error } from "../../modules/notifications";
 
 import api from "../../services/api";
 
+import EmptyImage from "../../assets/images/empty.jpg";
+
 import { Container } from "./styles";
 import { Mask, fDate } from "../../modules/formatter";
 
@@ -71,6 +73,7 @@ function Index({ selected, onClose, reload }) {
                         createdAt,
                         created_at,
                         createdBy,
+                        assets_contribution,
                     } = data;
 
                     const selectedData = {
@@ -80,6 +83,7 @@ function Index({ selected, onClose, reload }) {
                         createdBy,
                         created_at,
                         inventory_movements_logs,
+                        assets_contribution,
                     };
 
                     const formmatedQuantity = Mask(
@@ -294,6 +298,13 @@ function Index({ selected, onClose, reload }) {
                 createdAt: new Date(),
             });
 
+            if (data.assets_contribution) {
+                await api.put(
+                    `/assets-contributions/${data.assets_contribution.id}`,
+                    { quantity: data.quantity }
+                );
+            }
+
             notifications("success", "Movimentação de Estoque atualizada");
         } catch (error) {
             Error(error);
@@ -396,7 +407,13 @@ function Index({ selected, onClose, reload }) {
                                 <div>
                                     <p>
                                         <img
-                                            src={`${api.defaults.baseURL}${log.createdBy.image.url}`}
+                                            src={
+                                                !!Object.keys(
+                                                    data.createdBy.image
+                                                ).length
+                                                    ? `${api.defaults.baseURL}${data.createdBy.image.url}`
+                                                    : EmptyImage
+                                            }
                                             alt="Creator of movement"
                                         />{" "}
                                         <strong>
@@ -417,7 +434,12 @@ function Index({ selected, onClose, reload }) {
                             <div>
                                 <p>
                                     <img
-                                        src={`${api.defaults.baseURL}${data.createdBy.image.url}`}
+                                        src={
+                                            !!Object.keys(data.createdBy.image)
+                                                .length
+                                                ? `${api.defaults.baseURL}${data.createdBy.image.url}`
+                                                : EmptyImage
+                                        }
                                         alt="Creator of movement"
                                     />{" "}
                                     <strong>{data.createdBy.username}</strong>{" "}
