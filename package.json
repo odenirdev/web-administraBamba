@@ -1,6 +1,6 @@
 {
     "name": "web",
-    "version": "0.2.0",
+    "version": "1.0.0",
     "private": true,
     "dependencies": {
         "@syncfusion/ej2-react-schedule": "^18.3.50",
@@ -11,6 +11,7 @@
         "bootstrap": "^4.5.2",
         "cldr-core": "^37.0.0",
         "cldr-data": "^36.0.0",
+        "datatables.net": "^1.10.21",
         "firebase": "^8.2.0",
         "immer": "^8.0.0",
         "jquery": "^3.5.1",
@@ -24,6 +25,7 @@
         "react-dropzone": "^11.2.0",
         "react-globalize": "^1.0.0",
         "react-icons": "^3.11.0",
+        "react-minimal-pie-chart": "^8.1.0",
         "react-notifications": "^1.7.2",
         "react-og-forms": "^1.1.4",
         "react-router-dom": "^5.2.0",

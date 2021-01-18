@@ -1,110 +1,10 @@
 import React, { useState } from "react";
-import Styled, { css } from "styled-components";
 import { FaBars, FaTimes } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
-const ContainerDisplay = css`
-    background-color: var(--color-primary);
+import { Container, Button, MenuContainer } from "./styles";
 
-    width: 100%;
-    height: 100%;
-
-    bottom: 0;
-    left: 0;
-    animation-name: animation;
-    animation-duration: 270ms;
-
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    @keyframes animation {
-        0% {
-            width: 0%;
-            height: 0%;
-        }
-        25% {
-            width: 25%;
-            height: 25%;
-            border-radius: 50% 50% 50% 0;
-        }
-        50% {
-            width: 50%;
-            height: 50%;
-            border-radius: 150% 50% 50% 0;
-        }
-        75% {
-            width: 75%;
-            height: 75%;
-            border-radius: 50% 50% 50% 0;
-        }
-        100% {
-            width: 100%;
-            height: 100%;
-            border-radius: 50% 50% 50% 0;
-        }
-    }
-`;
-
-const ButtonDisplay = css`
-    background-color: var(--gray-5);
-    color: var(--color-primary);
-    position: absolute;
-    top: 0.5rem;
-    right: 0.5rem;
-`;
-
-const Container = Styled.div`
-    position: fixed;
-    bottom: 1rem;
-    left: 1rem;
-    z-index: 1!important;
-
-
-    ${(props) => props.display && ContainerDisplay}
-`;
-
-const Button = Styled.button`
-    border: 0;
-    border-radius: 60px;
-    
-    padding: 1rem;
-    
-    font-size: 2rem;
-
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    background-color: var(--color-primary);
-    color: var(--gray-5);
-    
-    cursor: pointer;
-
-    ${(props) => props.display && ButtonDisplay}
-
-    &:hover {
-        filter: brightness(120%);
-    }
-`;
-
-const MenuContainer = Styled.div`
-    display: ${(props) => (props.display ? "flex" : "none")};
-    flex-direction: column;
-    text-align: center;
-    
-    & a {
-        text-decoration: none;
-        font-size: 3rem;
-        font-family: var(--font-title);
-        color: var(--gray-4);
-        transition: 200ms;
-    }
-
-    & a:hover {
-        filter: brightness(150%);
-    }
-`;
+import System from "../../modules/system";
 
 const Index = () => {
     const [display, setDisplay] = useState(false);
@@ -123,7 +23,13 @@ const Index = () => {
                 <Link to="/school">Escola</Link>
                 <Link to="/boards">Quadros</Link>
                 <Link to="/conversations">Conversas</Link>
-                <Link to="/assets">Atívos</Link>
+                <Link to="/schedule">Calendário</Link>
+                {System.isAdmin() && (
+                    <>
+                        <Link to="/assets">Atívos</Link>
+                        <Link to="/wallet">Carteira</Link>
+                    </>
+                )}
             </MenuContainer>
         </Container>
     );

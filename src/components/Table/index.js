@@ -41,6 +41,7 @@ const Index = Styled.table`
 export const ResponsiveTable = Styled.div`
     width: 100%;
     overflow-x: auto;
+    overflow-y: hidden;
 `;
 
 export default Index;

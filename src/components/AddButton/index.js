@@ -30,13 +30,15 @@ const Button = Styled.button`
     
     & .add-icon {
         font-size: 1.2rem;
+        margin-left: 0.2rem;
+
     }
 
 `;
 
-const Index = ({ onClick, Icon = () => <></> }) => (
-    <Button onClick={onClick}>
-        <FaPlus className="add-plus-icon" />
+const Index = ({ onClick, Icon = () => <></>, Sign = FaPlus, title = "" }) => (
+    <Button {...{ onClick, title }}>
+        <Sign className="add-plus-icon" />
         <Icon className="add-icon" />
     </Button>
 );

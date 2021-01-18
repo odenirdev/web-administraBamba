@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useContext } from "react";
-import Styled from "styled-components";
 import { Row } from "react-bootstrap";
 import { Switch } from "react-og-forms";
 import {
@@ -9,6 +8,8 @@ import {
     FaAngleLeft,
     FaAngleRight,
 } from "react-icons/fa";
+import $ from "jquery";
+import "jquery-mask-plugin";
 
 import Form, {
     Input,
@@ -18,29 +19,20 @@ import Form, {
 } from "../../components/Form";
 import Button from "../../components/Button";
 import SelectContributors from "../../components/SelectContributors";
+import SelectAssets from "../../components/SelectAssets";
 
 import Api from "../../services/api";
 import Firebase from "../../services/firebase";
 
 import Notification, { Error } from "../../modules/notifications";
+import { Mask } from "../../modules/formatter";
+import System from "../../modules/system";
 
 import AuthContext from "../../components/AuthContext";
 import BoardContext from "../../components/Board/context";
 
-const Container = Styled.div`
-    display: flex;
-    justify-content: center;
-    padding: 1rem;
-`;
-
-const StatusButton = Styled(Button)`
-    padding: 15px;
-    border-radius: 30px;
-
-    & svg {
-        margin: 0;
-    }
-`;
+import { Container, StatusButton, MoneyIn } from "./styles";
+import api from "../../services/api";
 
 const Index = ({ id, onClose }) => {
     const initalData = {
@@ -61,6 +53,8 @@ const Index = ({ id, onClose }) => {
 
     const [createEvent, setCreateEvent] = useState(false);
 
+    const [selectedAssets, setSelectedAssets] = useState([]);
+
     const {
         auth: { me },
     } = useContext(AuthContext);
@@ -69,6 +63,12 @@ const Index = ({ id, onClose }) => {
         data: { lists, id: idBoard },
         index: indexBoard,
     } = useContext(BoardContext);
+
+    useEffect(() => {
+        $("input[name=money-contribution]").mask("#.##0,00", {
+            reverse: true,
+        });
+    }, []);
 
     useEffect(() => {
         async function showTask() {
@@ -95,6 +95,36 @@ const Index = ({ id, onClose }) => {
                     setCreateEvent(false);
                 }
 
+                task.wallet =
+                    task.wallet && !task.wallet.deleted ? task.wallet : {};
+
+                const price = task.wallet
+                    ? parseFloat(task.wallet.price).toFixed(2)
+                    : undefined;
+
+                const priceEl = $("input[name=money-contribution]");
+                priceEl[1].value = Mask(price, "#.##0,00", {
+                    reverse: true,
+                });
+
+                const serializedAssetsContribution = task[
+                    "assets_contributions"
+                ].map((item) => {
+                    return {
+                        ...item,
+                        asset: { id: item.asset },
+                        quantity: Mask(
+                            parseFloat(item.quantity).toFixed(2),
+                            "##0,00",
+                            {
+                                reverse: true,
+                            }
+                        ),
+                    };
+                });
+
+                setSelectedAssets(serializedAssetsContribution);
+
                 setData({
                     ...task,
                     event: task.event && task.event.id,
@@ -105,7 +135,21 @@ const Index = ({ id, onClose }) => {
             }
         }
 
-        if (id) showTask();
+        const initalData = {
+            title: "",
+            dueDate: "Y-m-d",
+            description: "",
+        };
+
+        if (id) {
+            showTask();
+        } else {
+            setData(initalData);
+
+            $("input[name=money-contribution]").val("");
+            setSelectedAssets([]);
+            setSelectedUsers([]);
+        }
     }, [id, idBoard]);
 
     useEffect(() => {
@@ -191,6 +235,121 @@ const Index = ({ id, onClose }) => {
         });
     }
 
+    async function createMoneyContribution() {
+        const priceEl = $("input[name=money-contribution]");
+        const price = parseFloat(
+            String(priceEl[1].value).replace(".", "").replace(",", ".")
+        ).toFixed(2);
+
+        if (!price || isNaN(price)) return;
+
+        const response = await api.post("/wallets", {
+            price,
+            type: 0,
+            reason: `Dinheiro de contribuição para a tarefa "${data.title}"`,
+            createdBy: me.id,
+            createdAt: new Date(),
+        });
+
+        return response.data.id;
+    }
+
+    async function handleLogUpdateMoneyContribution(
+        oldPrice,
+        newPrice,
+        wallet
+    ) {
+        const text = `alterou o valor de R$ ${Mask(
+            parseFloat(oldPrice).toFixed(2),
+            "#.##0,00",
+            { reverse: true }
+        )} para ${Mask(parseFloat(newPrice).toFixed(2), "#.##0,00", {
+            reverse: true,
+        })}`;
+
+        await api.post("/wallet-logs", {
+            createdBy: me.id,
+            createdAt: new Date(),
+            wallet,
+            text,
+        });
+    }
+
+    async function updateMoneyContribution() {
+        if (data.wallet && Object.keys(data.wallet).length !== 0) {
+            const priceEl = $("input[name=money-contribution]");
+            const price = parseFloat(
+                String(priceEl[1].value).replace(".", "").replace(",", ".")
+            ).toFixed(2);
+
+            if (price === parseFloat(data.wallet.price).toFixed(2)) {
+                return;
+            }
+
+            await api.put(`/wallets/${data.wallet.id}`, { price });
+
+            await handleLogUpdateMoneyContribution(
+                data.wallet.price,
+                price,
+                data.wallet.id
+            );
+
+            return 0;
+        } else {
+            return await createMoneyContribution();
+        }
+    }
+
+    async function createAssetsContribution(task) {
+        selectedAssets.forEach(async (item) => {
+            if (parseFloat(item.quantity) === 0) return;
+
+            const {
+                data: { id: inventory_movement },
+            } = await api.post("/inventory-movements", {
+                asset: item.asset.id,
+                type: false,
+                quantity: parseFloat(item.quantity).toFixed(2),
+                createdAt: new Date(),
+                createdBy: me.id,
+            });
+
+            await api.post("/assets-contributions", {
+                asset: item.asset.id,
+                quantity: parseFloat(item.quantity).toFixed(2),
+                createdAt: new Date(),
+                createdBy: me.id,
+                task,
+                inventory_movement,
+            });
+        });
+    }
+
+    async function updateAssetsContribution(task) {
+        selectedAssets.forEach(async (item) => {
+            if (item.id || parseFloat(item.quantity) === 0) return;
+
+            const {
+                data: { id: inventory_movement },
+            } = await api.post("/inventory-movements", {
+                asset: item.asset.id,
+                type: false,
+                quantity: parseFloat(item.quantity).toFixed(2),
+                createdAt: new Date(),
+                createdBy: me.id,
+            });
+
+            await api.post("/assets-contributions", {
+                asset: item.asset.id,
+                quantity: parseFloat(item.quantity).toFixed(2),
+                createdAt: new Date(),
+                createdBy: me.id,
+                task,
+                inventory_movement,
+            });
+        });
+    }
+
     async function create(data) {
         try {
             const createData = {
@@ -199,9 +358,12 @@ const Index = ({ id, onClose }) => {
                 creator: me.id,
                 list: 1,
                 position: lists[1].tasks.length,
+                wallet: await createMoneyContribution(),
             };
 
-            await Api.post("/tasks", createData);
+            const response = await Api.post("/tasks", createData);
+
+            await createAssetsContribution(response.data.id);
 
             selectedUsers.forEach((item) => {
                 Firebase.child("notifications").push(
@@ -224,6 +386,7 @@ const Index = ({ id, onClose }) => {
             onClose();
             setData(initalData);
             setSelectedUsers([]);
+            setSelectedAssets([]);
             Notification("success", "Tarefa cadastrada");
         } catch (error) {
             Error(error);
@@ -232,7 +395,17 @@ const Index = ({ id, onClose }) => {
 
     async function update(data) {
         try {
+            const wallet = await updateMoneyContribution();
+
+            let updateData = data;
+
+            if (wallet > 0) {
+                updateData.wallet = wallet;
+            }
+
             await Api.put(`/tasks/${data.id}`, data);
+
+            await updateAssetsContribution(data.id);
 
             handleUpdateNotifications(data);
 
@@ -240,6 +413,7 @@ const Index = ({ id, onClose }) => {
             onClose();
             setData(initalData);
             setSelectedUsers([]);
+            setSelectedAssets([]);
             Notification("success", "Tarefa atualizada");
         } catch (error) {
             Error(error);
@@ -274,6 +448,7 @@ const Index = ({ id, onClose }) => {
             indexBoard();
             setData(initalData);
             setSelectedUsers([]);
+            setSelectedAssets([]);
             onClose();
             Notification("success", "Tarefa removido");
         } catch (error) {
@@ -371,6 +546,10 @@ const Index = ({ id, onClose }) => {
             requestData.event = "";
         }
 
+        if (data.wallet) {
+            requestData.wallet = data.wallet.id;
+        }
+
         if (requestData.id) {
             update(requestData);
             return;
@@ -450,21 +629,50 @@ const Index = ({ id, onClose }) => {
                         value={selectedUsers}
                     />
                 </FormItem>
-                <FormItem>
-                    <Switch
-                        label="Criar evento"
-                        value={createEvent}
-                        onChange={(value) => {
-                            setCreateEvent(value);
-                        }}
-                    />
-                </FormItem>
+
+                <Row>
+                    <MoneyIn
+                        show={
+                            (data.wallet &&
+                                Object.keys(data.wallet).length !== 0) ||
+                            System.isAdmin()
+                        }
+                        md="4"
+                    >
+                        <Input
+                            label="Contribuição financeira"
+                            type="text"
+                            name="money-contribution"
+                            readOnly={!System.isAdmin()}
+                        />
+                    </MoneyIn>
+                    <FormItem className="d-flex justify-content-end">
+                        <Switch
+                            label="Criar evento"
+                            value={createEvent}
+                            onChange={(value) => {
+                                setCreateEvent(value);
+                            }}
+                        />
+                    </FormItem>
+                </Row>
+
+                <Row>
+                    <FormItem>
+                        <SelectAssets
+                            value={selectedAssets}
+                            onChange={setSelectedAssets}
+                        />
+                    </FormItem>
+                </Row>
+
                 {data.created_at && (
-                    <span>
+                    <span className="created-by">
                         Criado em{" "}
                         {new Date(data.created_at).toLocaleDateString()}
                     </span>
                 )}
+
                 <GridButtons>
                     {!id ? (
                         <Button type="submit">

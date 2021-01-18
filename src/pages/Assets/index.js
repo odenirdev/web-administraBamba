@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState, useContext } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Row, Col } from "react-bootstrap";
 
 import Container from "../../components/Container";
@@ -64,7 +64,7 @@ function Index() {
             >
                 <Container>
                     <Row>
-                        <Col md="8">
+                        <Col md="8" className="p-0">
                             <Assets />
                         </Col>
                         <Col md="4">

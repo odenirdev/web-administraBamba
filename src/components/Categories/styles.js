@@ -8,9 +8,27 @@ export const Container = styled.div`
         display: flex;
         align-items: center;
         justify-content: space-between;
-        margin-bottom: 1rem;
+        padding: 0.2rem;
+        border-radius: 2px;
+
+        div {
+            height: 100%;
+            width: 85%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: 0.2s;
+            color: var(--color-primary);
+        }
+
+        div:hover,
+        div:hover h1 {
+            filter: brightness(120%);
+        }
 
         h1 {
+            color: var(--color-primary);
             font-size: 1.8rem;
             margin: 0;
         }

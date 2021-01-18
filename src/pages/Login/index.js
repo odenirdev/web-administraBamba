@@ -10,7 +10,6 @@ import LogoImg from "../../assets/images/adsamba-logo.png";
 import Form, { GridButtons } from "../../components/Form";
 import Input from "../../components/Input";
 import Button from "../../components/Button";
-import Hr from "../../components/Hr";
 import Img from "../../components/Img";
 
 import AuthContext from "../../components/AuthContext";
@@ -138,17 +137,6 @@ const Index = () => {
                             <Button type="submit">
                                 <FaSignInAlt />
                                 Entrar
-                            </Button>
-                        </GridButtons>
-                        <Hr />
-                        <GridButtons className="flex-column">
-                            <Button
-                                background="var(--green-1)"
-                                onClick={() => {
-                                    history.push("/register");
-                                }}
-                            >
-                                Criar nova conta
                             </Button>
                         </GridButtons>
                     </Col>

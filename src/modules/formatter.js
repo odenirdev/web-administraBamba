@@ -7,6 +7,20 @@ export const fDate = (date, type) => {
             let newDate = new Date(date).toISOString();
             return newDate.slice(0, newDate.indexOf("T"));
 
+        case "local-datetime":
+            let t = new Date(date);
+            let z = t.getTimezoneOffset() * 60 * 1000;
+            let tLocal = t - z;
+            tLocal = new Date(tLocal);
+            let iso = tLocal.toISOString();
+            iso = iso.slice(0, 16);
+
+            return iso;
+
+        case "datetime":
+            let newDatetime = new Date(date).toISOString();
+            return newDatetime.slice(0, newDatetime.indexOf("Z") - 7);
+
         default:
             console.error("type date invalid");
             break;

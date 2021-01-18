@@ -1,5 +1,10 @@
 import React, { useState, useContext } from "react";
-import { FaFolder } from "react-icons/fa";
+import {
+    FaFolder,
+    FaRulerVertical,
+    FaCaretDown,
+    FaCaretUp,
+} from "react-icons/fa";
 
 import Table, { ResponsiveTable } from "../../components/Table";
 import AddButton from "../AddButton";
@@ -13,6 +18,8 @@ import { Container } from "./styles";
 
 function Index() {
     const [show, setShow] = useState(false);
+
+    const [showTable, setShowTable] = useState(false);
 
     const [selected, setSelected] = useState({});
 
@@ -49,10 +56,22 @@ function Index() {
             </Modal>
             <Container>
                 <header>
-                    <h1>Unidades de Medida</h1>
-                    <AddButton onClick={handleAddModal} />
+                    <div
+                        onClick={() => {
+                            setShowTable(!showTable);
+                        }}
+                    >
+                        <h1>Unidades de Medida</h1>
+
+                        {showTable ? <FaCaretUp /> : <FaCaretDown />}
+                    </div>
+                    <AddButton
+                        onClick={handleAddModal}
+                        Icon={FaRulerVertical}
+                        title="Cadastrar Unidade de Medida"
+                    />
                 </header>
-                {data.length !== 0 && (
+                {data.length !== 0 && showTable && (
                     <ResponsiveTable>
                         <Table>
                             <thead>

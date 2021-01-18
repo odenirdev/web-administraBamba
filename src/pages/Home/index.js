@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 
-import Container from "../../components/Container";
+import AuthContainer from "../../components/Container";
 import Img from "../../components/Img";
-import Schedule from "../../components/Schedule";
 import Spinner, {
     Container as ContainerSpinner,
 } from "../../components/SpinnerLoader";
+import LogoImg from "../../assets/images/adsamba-logo.png";
 
 import Api from "../../services/api";
 
@@ -14,18 +14,23 @@ import RegisterSchool from "../../pages/RegisterSchool";
 
 import ADSAMBAIcon from "../../assets/images/adsamba-logo.png";
 
+import AuthContext from "../../components/AuthContext";
+
+import { Container } from "./styles";
+
 const Index = () => {
     const [statusSchool, setStatusSchool] = useState(0);
 
-    const [me, setMe] = useState(0);
-
-    useEffect(() => {}, []);
+    const {
+        auth: { me },
+    } = useContext(AuthContext);
 
     useEffect(() => {
         async function authSchool() {
             const response = await Api.get("/schools/count");
+
             if (response.data === 0) {
-                if (me.role === 4) {
+                if (me.role.id === 4) {
                     setStatusSchool(1);
                 } else {
                     setStatusSchool(2);
@@ -34,23 +39,7 @@ const Index = () => {
         }
 
         authSchool();
-    }, [me.role]);
-
-    useEffect(() => {
-        async function showMe() {
-            try {
-                const response = await Api.get("/users/me");
-
-                try {
-                    setMe({ ...response.data, role: response.data.role.id });
-                } catch (err) {}
-            } catch (error) {
-                Error(error);
-            }
-        }
-
-        showMe();
-    }, []);
+    }, [me]);
 
     if (!me && statusSchool === 0) {
         return (
@@ -70,9 +59,12 @@ const Index = () => {
     }
 
     return (
-        <Container>
-            <Schedule />
-        </Container>
+        <AuthContainer>
+            <Container>
+                <Img src={LogoImg} width="400px" />
+                <p>Prazer em recebê-lo {me.username}</p>
+            </Container>
+        </AuthContainer>
     );
 };
 

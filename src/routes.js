@@ -13,6 +13,9 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import Conversations from "./pages/Conversations";
 import Assets from "./pages/Assets";
+import Wallet from "./pages/Wallet";
+import InventoryMovement from "./pages/InventoryMovement";
+import Schedule from "./pages/Schedule";
 
 import AuthContext from "./components/AuthContext";
 
@@ -70,6 +73,13 @@ const Index = () => {
                     component={RegisterSchool}
                 />
                 <Authenticated exact path="/assets" component={Assets} />
+                <Authenticated exact path="/wallet" component={Wallet} />
+                <Authenticated
+                    exact
+                    path="/inventory-movements"
+                    component={InventoryMovement}
+                />
+                <Authenticated exact path="/schedule" component={Schedule} />
             </Switch>
         </BrowserRouter>
     );
