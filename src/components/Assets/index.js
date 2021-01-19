@@ -134,18 +134,18 @@ function Index() {
             <Modal
                 {...{ show }}
                 onClose={handleOnCloseModal}
-                title={`${!selected ? "Nova" : ""} Átivo`}
+                title={`${!selected ? "Nova" : ""} Ativo`}
             >
                 <Assets {...{ selected, index, onClose: handleOnCloseModal }} />
             </Modal>
             <Container>
                 <header>
-                    <h1>Átivos</h1>
+                    <h1>Ativos</h1>
                     <div>
                         <AddButton
                             onClick={handleAddModal}
                             Icon={FaBox}
-                            title="Cadastrar Átivo"
+                            title="Cadastrar Ativo"
                         />
                         <AddButton
                             Sign={() => <></>}

@@ -208,7 +208,7 @@ function Index() {
                 <Container>
                     <header>
                         <h1>
-                            Carteira
+                            Movimentações de Caixa
                             <CicleButton
                                 Icon={FaMoneyBillWave}
                                 title="Cadastrar Movimentação"

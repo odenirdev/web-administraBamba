@@ -1,6 +1,6 @@
 {
     "name": "web",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "private": true,
     "dependencies": {
         "@syncfusion/ej2-react-schedule": "^18.3.50",
@@ -11,6 +11,7 @@
         "bootstrap": "^4.5.2",
         "cldr-core": "^37.0.0",
         "cldr-data": "^36.0.0",
+        "datatables": "^1.10.18",
         "datatables.net": "^1.10.21",
         "firebase": "^8.2.0",
         "immer": "^8.0.0",

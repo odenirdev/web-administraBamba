@@ -1,12 +1,11 @@
-import React, { useEffect, useContext, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import ReactDOM from "react-dom";
-import { FaFolder, FaClipboard } from "react-icons/fa";
+import { FaFolder } from "react-icons/fa";
 import { useHistory } from "react-router-dom";
 
-import AuthContext from "../AuthContext";
 import { isOverDue } from "../../pages/Board";
+
 import Table, { ResponsiveTable } from "../Table";
-import CircleButton from "../CircleButton";
 
 import { Error } from "../../modules/notifications";
 import DataTables from "../../modules/datatables";
@@ -15,13 +14,9 @@ import api from "../../services/api";
 import { Container } from "./styles";
 
 function Index() {
-    const {
-        auth: { me },
-    } = useContext(AuthContext);
+    const [data, setData] = useState([]);
 
     const history = useHistory();
-
-    const [data, setData] = useState([]);
 
     const setReactComponentinTable = useCallback(() => {
         const handleEdit = (id) => {
@@ -86,7 +81,7 @@ function Index() {
         });
 
         DataTables(
-            "#my-boards-table",
+            "#boards-table",
             serializedData,
             [
                 { title: "Título", data: "title" },
@@ -108,40 +103,24 @@ function Index() {
     useEffect(() => {
         async function index() {
             try {
-                const responseMyBoards = await api.get(
-                    `/boards?_limit=-1&deleted=false&creator=${me.id}`
+                const { data } = await api.get(
+                    `/boards?_limit=-1&deleted=false`
                 );
 
-                const responseContributing = await api.get(
-                    `/boards?_limit=-1&deleted=false&users_in=${me.id}`
-                );
-
-                setData([
-                    ...responseMyBoards.data,
-                    ...responseContributing.data,
-                ]);
+                setData(data);
             } catch (error) {
                 Error(error);
             }
         }
 
         index();
-    }, [me.id]);
+    }, []);
 
     return (
         <Container>
-            <header className="col-12">
-                <h2>Meus Quadros</h2>
-                <CircleButton
-                    Icon={FaClipboard}
-                    title="Meus Quadros"
-                    onClick={() => {
-                        history.push("/boards");
-                    }}
-                />
-            </header>
+            <h2>Quadros</h2>
             <ResponsiveTable>
-                <Table id="my-boards-table"></Table>
+                <Table id="boards-table"></Table>
             </ResponsiveTable>
         </Container>
     );

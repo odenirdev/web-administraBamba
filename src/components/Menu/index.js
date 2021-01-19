@@ -26,8 +26,8 @@ const Index = () => {
                 <Link to="/schedule">Calendário</Link>
                 {System.isAdmin() && (
                     <>
-                        <Link to="/assets">Atívos</Link>
-                        <Link to="/wallet">Carteira</Link>
+                        <Link to="/assets">Ativos</Link>
+                        <Link to="/wallet">Caixa</Link>
                     </>
                 )}
             </MenuContainer>

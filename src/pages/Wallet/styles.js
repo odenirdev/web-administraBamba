@@ -7,6 +7,7 @@ export const Container = styled.div`
         align-items: center;
 
         h1 {
+            font-size: 1.7rem;
             display: flex;
             align-items: center;
         }

@@ -2,10 +2,12 @@ import React, { useEffect, useState, useContext } from "react";
 
 import AuthContainer from "../../components/Container";
 import Img from "../../components/Img";
+import DashboardComponent from "../../components/DashboardComponent";
+import DashboardManagers from "../../components/DashboardManagers";
+import DashboardAdministrators from "../../components/DashboardAdministrators";
 import Spinner, {
     Container as ContainerSpinner,
 } from "../../components/SpinnerLoader";
-import LogoImg from "../../assets/images/adsamba-logo.png";
 
 import Api from "../../services/api";
 
@@ -61,8 +63,17 @@ const Index = () => {
     return (
         <AuthContainer>
             <Container>
-                <Img src={LogoImg} width="400px" />
-                <p>Prazer em recebê-lo {me.username}</p>
+                {me.role &&
+                    !!Object.keys(me.role).length &&
+                    me.role.id === 1 && <DashboardComponent />}
+
+                {me.role &&
+                    !!Object.keys(me.role).length &&
+                    me.role.id === 3 && <DashboardManagers />}
+
+                {me.role &&
+                    !!Object.keys(me.role).length &&
+                    me.role.id === 4 && <DashboardAdministrators />}
             </Container>
         </AuthContainer>
     );
