@@ -17,6 +17,7 @@ import { fDate, Mask } from "../../modules/formatter";
 import api from "../../services/api";
 
 import EmptyImage from "../../assets/images/empty.jpg";
+import Confirm from "../../modules/alertConfirm";
 
 function Index({ onClose, selectedWallet, reload }) {
     const {
@@ -223,20 +224,28 @@ function Index({ onClose, selectedWallet, reload }) {
         }
     }
 
-    async function destroy() {
-        try {
-            await api.put(`/wallets/${data.id}`, { deleted: true });
+    function destroy() {
+        Confirm(
+            "Remover Movimentação de Caixa",
+            "Tem certeza que deseja remover ?",
+            async () => {
+                try {
+                    await api.put(`/wallets/${data.id}`, { deleted: true });
 
-            notification(
-                "success",
-                `${data.type === 1 ? "Entrada" : "Saída"} de dinheiro removida`
-            );
+                    notification(
+                        "success",
+                        `${
+                            data.type === 1 ? "Entrada" : "Saída"
+                        } de dinheiro removida`
+                    );
 
-            reload();
-            onClose();
-        } catch (error) {
-            Error(error);
-        }
+                    reload();
+                    onClose();
+                } catch (error) {
+                    Error(error);
+                }
+            }
+        );
     }
 
     async function handleSubmit(event) {
@@ -340,7 +349,7 @@ function Index({ onClose, selectedWallet, reload }) {
                                         alt="Creator of movement"
                                     />{" "}
                                     <strong>{data.createdBy.username}</strong>{" "}
-                                    adicionou está movimentação
+                                    adicionou esta movimentação
                                 </p>
                             </div>
                             <span>

@@ -89,6 +89,7 @@ const Index = ({ user, updateUsers, onClose }) => {
 
             Notification("success", "Usuário atualizado");
             updateUsers();
+            onClose();
         } catch (error) {
             return Error(error);
         }
@@ -269,7 +270,7 @@ const Index = ({ user, updateUsers, onClose }) => {
                     <option value="1">Componente</option>
                 </Select>
                 <IconGrid>
-                    {me.id !== data.id && (
+                    {data.id && me.id !== data.id && (
                         <FaCommentDots
                             className="chat-icon"
                             onClick={handleConversationClick}

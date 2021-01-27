@@ -14,6 +14,7 @@ import UnitOfMeasurementContext from "../../components/UnitOfMeasurement/context
 import notification, { Error } from "../../modules/notifications";
 
 import api from "../../services/api";
+import Confirm from "../../modules/alertConfirm";
 
 function Index({ selected, onClose, index }) {
     const { data: categories } = useContext(CategoriesContext);
@@ -81,7 +82,7 @@ function Index({ selected, onClose, index }) {
         try {
             await api.post("/assets", data);
 
-            notification("success", "Átivo cadastrado");
+            notification("success", "Ativo cadastrado");
         } catch (error) {
             Error(error);
         }
@@ -91,22 +92,28 @@ function Index({ selected, onClose, index }) {
         try {
             await api.put(`/assets/${data.id}`, data);
 
-            notification("success", "Átivo alterado");
+            notification("success", "Ativo alterado");
         } catch (error) {
             Error(error);
         }
     }
 
-    async function destroy() {
-        try {
-            await api.put(`/assets/${data.id}`, { deleted: true });
+    function destroy() {
+        Confirm(
+            "Remover Alerta",
+            "Tem certeza que deseja remover ?",
+            async () => {
+                try {
+                    await api.put(`/assets/${data.id}`, { deleted: true });
 
-            notification("success", "Átivo removido");
-            index();
-            onClose();
-        } catch (error) {
-            Error(error);
-        }
+                    notification("success", "Ativo removido");
+                    index();
+                    onClose();
+                } catch (error) {
+                    Error(error);
+                }
+            }
+        );
     }
 
     function handleValidate() {

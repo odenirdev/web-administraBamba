@@ -17,8 +17,6 @@ import ScheduleContext from "./context";
 
 import {
     ScheduleComponent,
-    DragAndDrop,
-    Resize,
     Inject,
     Day,
     Week,
@@ -162,17 +160,7 @@ function Index() {
             allowResizing={true}
             allowDragAndDrop={true}
         >
-            <Inject
-                services={[
-                    Day,
-                    Week,
-                    WorkWeek,
-                    Month,
-                    Agenda,
-                    DragAndDrop,
-                    Resize,
-                ]}
-            />
+            <Inject services={[Day, Week, WorkWeek, Month, Agenda]} />
         </ScheduleComponent>
     );
 }

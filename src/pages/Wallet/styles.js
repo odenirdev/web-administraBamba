@@ -6,7 +6,12 @@ export const Container = styled.div`
         justify-content: space-between;
         align-items: center;
 
+        .filters-data {
+            padding: 0 1rem;
+        }
+
         h1 {
+            font-size: 1.7rem;
             display: flex;
             align-items: center;
         }

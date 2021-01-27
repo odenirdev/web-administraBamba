@@ -95,7 +95,7 @@ function Index({ value, onChange }) {
 
     return (
         <Container show={System.isAdmin()}>
-            {(System.isAdmin() || value.length !== 0) && <span>Átivos</span>}
+            {(System.isAdmin() || value.length !== 0) && <span>Ativos</span>}
             <Selected>
                 {value.map((item, index) => (
                     <li key={item.id}>

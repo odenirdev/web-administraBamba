@@ -14,8 +14,8 @@ const Index = Styled.table`
     }
 
     thead {
-        background-color: var(--color-primary);
-        color: var(--gray-5);
+        background-color: var(--white);
+        color: var(--black);
 
         th {
             padding: 10px 5px;
@@ -23,16 +23,11 @@ const Index = Styled.table`
     }
 
     tbody {
-        background-color: var(--gray-5);
-        border: 1px solid var(--gray-3);
-        border-top: 0;
+        background-color: #fff;
+        border-top: 1px solid #000;
+        border-bottom: 1px solid #000;
 
-        tr {    
-            border-bottom: 1px solid var(--gray-3);
-            
-        }
-
-        td{
+        td {
             padding: 10px 5px;
         }
     }

@@ -144,7 +144,7 @@ function Index() {
                     "#inventory-movement-table",
                     serializedData,
                     [
-                        { title: "Átivo", data: "asset" },
+                        { title: "Ativo", data: "asset" },
                         { title: "Tipo", data: "type" },
                         { title: "Quantidade", data: "quantity" },
                         { title: "Data", data: "createdAt" },
@@ -167,8 +167,8 @@ function Index() {
     }, [index]);
 
     function handleAddModal() {
-        setShow(true);
         setSelected("");
+        setShow(true);
     }
 
     function handleOnCloseModal() {

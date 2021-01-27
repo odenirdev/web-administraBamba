@@ -9,6 +9,7 @@ import Button from "../../components/Button";
 
 import AuthContext from "../../components/AuthContext";
 
+import Confirm from "../../modules/alertConfirm";
 import notifications, { Error } from "../../modules/notifications";
 
 import api from "../../services/api";
@@ -168,19 +169,39 @@ function Index({ selected, onClose, reload }) {
         if (data.asset) showAsset();
     }, [data, data.asset]);
 
-    async function destroy() {
-        try {
-            await api.put(`/inventory-movements/${selected}`, {
-                deleted: true,
-            });
+    function clearData() {
+        setData({
+            asset: "",
+            type: 1,
+            quantity: "",
+            createdAt: "",
+        });
 
-            notifications("success", "movimentação de Estoque removida");
+        $("#quantity").val("");
+    }
 
-            onClose();
-            reload();
-        } catch (error) {
-            Error(error);
-        }
+    function destroy() {
+        Confirm(
+            "Remover Movimentação de Estoque",
+            "Tem certeza que deseja remover ?",
+            async () => {
+                try {
+                    await api.put(`/inventory-movements/${selected}`, {
+                        deleted: true,
+                    });
+
+                    notifications(
+                        "success",
+                        "movimentação de Estoque removida"
+                    );
+
+                    onClose();
+                    reload();
+                } catch (error) {
+                    Error(error);
+                }
+            }
+        );
     }
 
     function serializeData() {
@@ -200,7 +221,11 @@ function Index({ selected, onClose, reload }) {
 
     function handleValidate(data) {
         if (!data.asset) {
-            return { status: false, message: "Átivo é obrigatório" };
+            return { status: false, message: "Ativo é obrigatório" };
+        }
+
+        if (!data.createdAt) {
+            return { status: false, message: "Data e Hora é obrigatório" };
         }
 
         if (isNaN(data.quantity)) {
@@ -326,6 +351,7 @@ function Index({ selected, onClose, reload }) {
         }
 
         onClose();
+        clearData();
         reload();
     }
 
@@ -335,7 +361,7 @@ function Index({ selected, onClose, reload }) {
                 <Row>
                     <Col md={7}>
                         <Select
-                            label="Átivo*"
+                            label="Ativo*"
                             name="asset"
                             id="asset"
                             value={data.asset}
@@ -353,7 +379,7 @@ function Index({ selected, onClose, reload }) {
                     </Col>
                     <Col md={5}>
                         <Input
-                            label="Data e Hora"
+                            label="Data e Hora*"
                             type="datetime-local"
                             value={data.createdAt}
                             onChange={(e) => {

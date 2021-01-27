@@ -208,14 +208,14 @@ function Index() {
                 <Container>
                     <header>
                         <h1>
-                            Carteira
+                            Movimentações de Caixa
                             <CicleButton
                                 Icon={FaMoneyBillWave}
                                 title="Cadastrar Movimentação"
                                 onClick={handleAddMovement}
                             />
                         </h1>
-                        <Row>
+                        <Row className="filters-data">
                             <Col>
                                 <Input
                                     type="date"

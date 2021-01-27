@@ -10,6 +10,24 @@ import Api from "../../services/api";
 
 import { Error } from "../../modules/notifications";
 
+export function isOverDue(date) {
+    if (!date) {
+        return false;
+    }
+
+    let formmatDate = new Date(date).toISOString();
+    formmatDate = formmatDate.slice(0, formmatDate.indexOf("T"));
+    formmatDate = `${formmatDate}T23:59:59`;
+
+    let formmatToday = new Date().toISOString();
+    formmatToday = formmatToday.slice(0, formmatToday.indexOf("T"));
+    formmatToday = `${formmatToday}T23:59:59`;
+
+    const dueDate = new Date(formmatDate).getTime();
+    const today = new Date(formmatToday).getTime();
+    return dueDate < today;
+}
+
 const Index = ({ match }) => {
     const [data, setData] = useState({});
 
@@ -32,24 +50,6 @@ const Index = ({ match }) => {
             var y = b[key];
             return x < y ? -1 : x > y ? 1 : 0;
         });
-    }
-
-    function isOverDue(date) {
-        if (!date) {
-            return false;
-        }
-
-        let formmatDate = new Date(date).toISOString();
-        formmatDate = formmatDate.slice(0, formmatDate.indexOf("T"));
-        formmatDate = `${formmatDate}T23:59:59`;
-
-        let formmatToday = new Date().toISOString();
-        formmatToday = formmatToday.slice(0, formmatToday.indexOf("T"));
-        formmatToday = `${formmatToday}T23:59:59`;
-
-        const dueDate = new Date(formmatDate).getTime();
-        const today = new Date(formmatToday).getTime();
-        return dueDate < today;
     }
 
     const index = useCallback(() => {

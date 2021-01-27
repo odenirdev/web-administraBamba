@@ -5,6 +5,8 @@ const Index = {
     "Auth.form.error.invalid": "Identificador ou senha inválidos",
     "Auth.form.error.username.taken": "Nome de usuário já cadastrado",
     "Auth.form.error.email.taken": "E-Mail já cadastrado",
+    "Auth.form.error.user.not-exist": "Esse e-mail não está cadastrado",
+    "Auth.form.error.code.provide": "Token inválido",
 };
 
 export default Index;
