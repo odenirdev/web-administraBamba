@@ -238,7 +238,7 @@ const Index = ({ id, onClose }) => {
     async function createMoneyContribution() {
         const priceEl = $("input[name=money-contribution]");
         const price = parseFloat(
-            String(priceEl[1].value).replace(".", "").replace(",", ".")
+            String(priceEl[1].value).replaceAll(".", "").replace(",", ".")
         ).toFixed(2);
 
         if (!price || isNaN(price)) return;
@@ -279,7 +279,7 @@ const Index = ({ id, onClose }) => {
         if (data.wallet && Object.keys(data.wallet).length !== 0) {
             const priceEl = $("input[name=money-contribution]");
             const price = parseFloat(
-                String(priceEl[1].value).replace(".", "").replace(",", ".")
+                String(priceEl[1].value).replaceAll(".", "").replace(",", ".")
             ).toFixed(2);
 
             if (price === parseFloat(data.wallet.price).toFixed(2)) {

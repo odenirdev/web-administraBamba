@@ -207,7 +207,7 @@ function Index({ selected, onClose, reload }) {
     function serializeData() {
         const quantity = parseFloat(
             String(document.querySelector("#quantity").value)
-                .replace(".", "")
+                .replaceAll(".", "")
                 .replace(",", ".")
         ).toFixed(2);
 

@@ -97,7 +97,7 @@ function Index({ onClose, selectedWallet, reload }) {
     function serializedData() {
         const priceEl = $("input[name=price]");
         const price = parseFloat(
-            String(priceEl.val()).replace(".", "").replace(",", ".")
+            String(priceEl.val()).replaceAll(".", "").replace(",", ".")
         ).toFixed(2);
 
         return {
