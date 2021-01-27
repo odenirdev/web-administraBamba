@@ -171,10 +171,10 @@ function Index() {
             "#wallet-table",
             serializedData,
             [
-                { title: "Tipo", data: "type" },
-                { title: "Valor", data: "price" },
-                { title: "Data", data: "createdAt" },
-                { title: "Abrir", data: "open" },
+                { title: "Tipo", data: "type", orderable: false },
+                { title: "Valor", data: "price", orderable: false },
+                { title: "Data", data: "createdAt", orderable: false },
+                { title: "Abrir", data: "open", orderable: false },
             ],
             () => {
                 setReactComponentinTable();
