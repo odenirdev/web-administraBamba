@@ -112,8 +112,12 @@ function Index() {
                     [
                         { title: "Nome", data: "name" },
                         { title: "Categoria", data: "category" },
-                        { title: "Quantidade", data: "quantity" },
-                        { title: "Abrir", data: "open" },
+                        {
+                            title: "Quantidade",
+                            data: "quantity",
+                            orderable: false,
+                        },
+                        { title: "Abrir", data: "open", orderable: false },
                     ],
                     () => {
                         setReactComponentinTable();
