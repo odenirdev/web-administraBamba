@@ -167,8 +167,8 @@ function Index() {
     }, [index]);
 
     function handleAddModal() {
-        setShow(true);
         setSelected("");
+        setShow(true);
     }
 
     function handleOnCloseModal() {

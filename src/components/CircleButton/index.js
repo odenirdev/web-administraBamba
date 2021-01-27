@@ -1,6 +1,5 @@
 import React from "react";
 import Styled from "styled-components";
-import { FaPlus } from "react-icons/fa";
 
 const Button = Styled.button`
     border: 0;

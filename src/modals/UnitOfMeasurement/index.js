@@ -9,6 +9,7 @@ import notification, { Error } from "../../modules/notifications";
 import api from "../../services/api";
 
 import { Container, ButtonsGrid } from "./styles";
+import Confirm from "../../modules/alertConfirm";
 
 function Index({ onClose, reload, selected }) {
     const [data, setData] = useState({});
@@ -44,18 +45,24 @@ function Index({ onClose, reload, selected }) {
         }
     }
 
-    async function destroy() {
-        try {
-            await api.put(`/unit-of-measurements/${data.id}`, {
-                deleted: true,
-            });
+    function destroy() {
+        Confirm(
+            "Remover unidade de medida",
+            "tem certeza que deseja remover ?",
+            async () => {
+                try {
+                    await api.put(`/unit-of-measurements/${data.id}`, {
+                        deleted: true,
+                    });
 
-            notification("success", "Unidade de medida removida");
-            reload();
-            onClose();
-        } catch (error) {
-            Error(error);
-        }
+                    notification("success", "Unidade de medida removida");
+                    reload();
+                    onClose();
+                } catch (error) {
+                    Error(error);
+                }
+            }
+        );
     }
 
     async function handleValidate() {

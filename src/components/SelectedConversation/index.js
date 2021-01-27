@@ -54,6 +54,8 @@ function Index({ id, users }) {
     function handleSubmit(e) {
         e.preventDefault();
         try {
+            if (!data) return;
+
             const pushData = {
                 message: data,
                 from: me.id,

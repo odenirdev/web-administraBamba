@@ -9,6 +9,7 @@ import notification, { Error } from "../../modules/notifications";
 import api from "../../services/api";
 
 import { Container } from "./styles";
+import Confirm from "../../modules/alertConfirm";
 
 function Index({ onClose, reload, selected, handleValidate }) {
     const initialValues = {
@@ -47,16 +48,22 @@ function Index({ onClose, reload, selected, handleValidate }) {
         }
     }
 
-    async function destroy() {
-        try {
-            await api.put(`/categories/${data.id}`, { deleted: true });
+    function destroy() {
+        Confirm(
+            "Remover categoria",
+            "Tem certeza que deseja remover ?",
+            async () => {
+                try {
+                    await api.put(`/categories/${data.id}`, { deleted: true });
 
-            notification("success", "Categoria atualizada");
-            reload();
-            onClose();
-        } catch (error) {
-            Error(error);
-        }
+                    notification("success", "Categoria atualizada");
+                    reload();
+                    onClose();
+                } catch (error) {
+                    Error(error);
+                }
+            }
+        );
     }
 
     async function handleSubmit(e) {

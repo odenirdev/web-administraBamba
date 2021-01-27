@@ -76,6 +76,6 @@ export const List = styled.div`
 
     li {
         list-style: none;
-        padding: 1rem;
+        padding: 1rem 1rem 0;
     }
 `;

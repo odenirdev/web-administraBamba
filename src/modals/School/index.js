@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState } from "react";
 import Styled from "styled-components";
 import { Row } from "react-bootstrap";
 import { FaEdit, FaSearch } from "react-icons/fa";
@@ -16,7 +16,6 @@ import Form, {
 import { File } from "../../components/Input";
 import Button from "../../components/Button";
 import Img from "../../components/Img";
-import AuthContext from "../../components/AuthContext";
 
 import Api from "../../services/api";
 import Confirm from "../../modules/alertConfirm";
@@ -42,8 +41,6 @@ const SearchButton = Styled(Button)`
 
 const Index = ({ school, indexSchool }) => {
     const [data, setData] = useState(school);
-
-    const { me } = useContext(AuthContext);
 
     useEffect(() => {
         if (!(Object.keys(school.image).length === 0)) {
@@ -185,20 +182,6 @@ const Index = ({ school, indexSchool }) => {
             }
 
             await Api.put(`/schools/${resquestData.id}`, resquestData);
-
-            try {
-                await Api.post("/logs", {
-                    entity: 3,
-                    type: 1,
-                    data: resquestData,
-                    createdAt: new Date(),
-                    user: me.id,
-                });
-            } catch (error) {
-                await Api.put(`/schools/${resquestData.id}`, school);
-
-                return Error(error);
-            }
 
             Notification("success", "Escola de samba atualizada");
             indexSchool();
