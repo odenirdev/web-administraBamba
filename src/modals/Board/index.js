@@ -288,7 +288,7 @@ const Index = ({ onClose, index: indexBoards }) => {
                     maxLength={280}
                     value={data.description}
                 />
-                {me.role && (
+                {me.role && me.role.id >= 3 && (
                     <SelectContributors
                         {...{ users }}
                         onChange={(values) => {
