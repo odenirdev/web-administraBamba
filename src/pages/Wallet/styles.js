@@ -6,6 +6,10 @@ export const Container = styled.div`
         justify-content: space-between;
         align-items: center;
 
+        @media (max-width: 1050px) {
+            flex-direction: column;
+        }
+
         .filters-data {
             padding: 0 1rem;
         }

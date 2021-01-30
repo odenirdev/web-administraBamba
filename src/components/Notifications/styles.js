@@ -13,7 +13,6 @@ position: relative;
     cursor: pointer;
 }
 
-margin-right: 2rem;
 
 color: var(--gray-5);
 `;

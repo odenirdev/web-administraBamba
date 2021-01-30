@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import Styled from "styled-components";
 import { Link } from "react-router-dom";
-import { FaUserCog, FaSignOutAlt } from "react-icons/fa";
+import { FaUserCog, FaSignOutAlt, FaQuestion } from "react-icons/fa";
 import { useHistory } from "react-router-dom";
 
 import Notifications from "../../components/Notifications";
@@ -18,6 +18,7 @@ import Profile from "../../modals/Profile";
 import Logo from "../../assets/images/Logo.png";
 
 import NotificationsGrid from "../NotificationsGrid";
+import InfoVideo from "../InfoVideo";
 
 import Firebase from "../../services/firebase";
 import Api from "../../services/api";
@@ -60,8 +61,16 @@ const Header = Styled.header`
 
 const Section = Styled.section`
     display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    min-width: 150px;
 
     position: relative;
+
+    svg {
+        cursor: pointer;
+    }
 `;
 
 const UserGrid = Styled.div`
@@ -109,6 +118,8 @@ const Index = () => {
     const history = useHistory();
 
     const [show, setShow] = useState(false);
+
+    const [showVideo, setShowVideo] = useState(false);
 
     const [drop, setDrop] = useState(false);
 
@@ -169,6 +180,13 @@ const Index = () => {
     return (
         <>
             <Modal
+                title="Informações"
+                show={showVideo}
+                onClose={() => setShowVideo(false)}
+            >
+                <InfoVideo />
+            </Modal>
+            <Modal
                 title="Meu Perfil"
                 show={show}
                 onClose={() => setShow(false)}
@@ -206,6 +224,12 @@ const Index = () => {
                     <Img src={Logo} width="5rem" />
                 </Header>
                 <Section>
+                    <FaQuestion
+                        size={26}
+                        color="var(--blue)"
+                        onClick={() => setShowVideo(true)}
+                    />
+
                     <Notifications
                         number={notifications.length}
                         onClick={() => setShowNotifications(!showNotifications)}

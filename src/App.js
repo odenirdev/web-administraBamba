@@ -3,6 +3,7 @@ import Routes from "./routes";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import "datatables/media/css/jquery.dataTables.css";
+import "video-react/dist/video-react.css";
 
 import AuthContext from "./components/AuthContext";
 import ConversationsContext from "./components/Conversations/context";

@@ -119,6 +119,8 @@ function Index() {
 
     function destroy(data) {
         try {
+            console.log(data);
+
             data.forEach(async (event) => {
                 await Api.put(`/events/${event.Id}`, { deleted: true });
 
@@ -130,17 +132,22 @@ function Index() {
     }
 
     function handleActionComplete(data) {
-        const { requestType, data: events } = data;
+        const {
+            requestType,
+            addedRecords,
+            changedRecords,
+            deletedRecords,
+        } = data;
 
         switch (requestType) {
             case "eventCreated":
-                return create(events);
+                return create(addedRecords);
 
             case "eventChanged":
-                return update(events);
+                return update(changedRecords);
 
             case "eventRemoved":
-                return destroy(events);
+                return destroy(deletedRecords);
 
             default:
                 break;
