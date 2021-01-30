@@ -120,7 +120,11 @@ const Index = () => {
                         max-width="250px"
                         onChange={(event) => setSearch(event.target.value)}
                     />
-                    <AddButton onClick={handleAdd} Icon={FaClipboard} />
+                    <AddButton
+                        onClick={handleAdd}
+                        Icon={FaClipboard}
+                        title="Cadastrar quadro"
+                    />
                 </Header>
                 <Section>
                     <Boards>
