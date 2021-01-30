@@ -249,7 +249,7 @@ const Index = ({ user, updateUsers, onClose }) => {
                     onChange={(event) => {
                         setData({ ...data, email: event.target.value });
                     }}
-                    maxLength={30}
+                    maxLength={50}
                     value={data.email || ""}
                     readOnly={!System.isAdmin()}
                 />

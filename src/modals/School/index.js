@@ -269,7 +269,7 @@ const Index = ({ school, indexSchool }) => {
                             onChange={(event) =>
                                 setData({ ...data, email: event.target.value })
                             }
-                            maxLength={30}
+                            maxLength={50}
                             readOnly={!System.isAdmin()}
                         />
                     </FormItem>
