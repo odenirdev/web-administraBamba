@@ -12,6 +12,9 @@ import Boards from "../../assets/videos/boards.mp4";
 import Tasks from "../../assets/videos/tasks.mp4";
 import SchoolAdmin from "../../assets/videos/school-admin.mp4";
 import School from "../../assets/videos/school.mp4";
+import HomeManagers from "../../assets/videos/home_managers.mp4";
+import HomeComponents from "../../assets/videos/home_components.mp4";
+import HomeAdm from "../../assets/videos/home_adm.mp4";
 
 import AuthContext from "../AuthContext";
 
@@ -28,6 +31,17 @@ function Index() {
 
     useEffect(() => {
         switch (location.pathname) {
+            case "/":
+                if (me.role && me.role.id === 1) {
+                    return setVideo(HomeComponents);
+                }
+
+                if (me.role && me.role.id === 4) {
+                    return setVideo(HomeAdm);
+                }
+
+                return setVideo(HomeManagers);
+
             case "/wallet":
                 return setVideo(WalletVideo);
 
