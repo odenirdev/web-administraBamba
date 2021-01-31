@@ -52,26 +52,30 @@ function Index() {
                 title,
             } = item;
 
-            const pending = tasks.filter(
+            const filteredTasks = tasks.filter((task) => !task.deleted);
+
+            const pending = filteredTasks.filter(
                 (task) => task.status === 1 && !isOverDue(task.dueDate)
             );
 
-            const overDue = tasks.filter(
+            const overDue = filteredTasks.filter(
                 (task) =>
                     task.status === 0 ||
                     (task.status === 1 && isOverDue(task.dueDate))
             );
 
-            const inProgress = tasks.filter((task) => task.status === 2);
+            const inProgress = filteredTasks.filter(
+                (task) => task.status === 2
+            );
 
-            const done = tasks.filter((task) => task.status === 3);
+            const done = filteredTasks.filter((task) => task.status === 3);
 
             return {
                 id,
                 description,
                 title,
                 creator,
-                tasks: tasks.length,
+                tasks: filteredTasks.length,
                 pending: pending.length,
                 overDue: overDue.length,
                 inProgress: inProgress.length,

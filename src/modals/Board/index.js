@@ -54,8 +54,6 @@ const Index = ({ onClose, index: indexBoards }) => {
 
                 setSelectedUsers(usersContributing);
 
-                console.log(board);
-
                 setData({
                     ...board,
                     creator: board.creator,

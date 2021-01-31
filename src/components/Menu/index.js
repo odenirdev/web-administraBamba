@@ -16,6 +16,7 @@ const Index = () => {
                 onClick={() => {
                     setDisplay(!display);
                 }}
+                title={display ? "Fechar Menu" : "Menu"}
             >
                 {display ? <FaTimes /> : <FaBars />}
             </Button>
