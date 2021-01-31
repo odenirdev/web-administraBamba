@@ -28,10 +28,10 @@ const User = Styled(Img)`
     filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));
 `;
 
-const Index = ({ onClick, src }) => {
+const Index = ({ onClick, src, title }) => {
     return (
         <>
-            <Container>
+            <Container {...{ title }}>
                 <User onClick={onClick} src={src || EmptyImg} />
             </Container>
         </>

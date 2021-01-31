@@ -48,6 +48,7 @@ function Index() {
                         </Description>
                         {data.id && (
                             <FaEdit
+                                title="Editar Quadro"
                                 size={27}
                                 onClick={() => setShowBoard(true)}
                             />

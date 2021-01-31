@@ -45,6 +45,7 @@ function List({ data, index: indexList }) {
                                 setShowTask(true);
                                 setSelectedTask({});
                             }}
+                            title="Cadastrar Tarefa"
                         >
                             <MdAdd size={24} color="#FFF" />
                         </button>

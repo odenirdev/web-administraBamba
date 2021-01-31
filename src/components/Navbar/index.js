@@ -220,6 +220,7 @@ const Index = () => {
                         index();
                     }}
                     className="cursor-pointer"
+                    title="Página Inicial"
                 >
                     <Img src={Logo} width="5rem" />
                 </Header>
@@ -228,14 +229,20 @@ const Index = () => {
                         size={26}
                         color="var(--blue)"
                         onClick={() => setShowVideo(true)}
+                        title="Informações"
                     />
 
                     <Notifications
                         number={notifications.length}
                         onClick={() => setShowNotifications(!showNotifications)}
+                        title="Notificações"
                     />
 
-                    <User src={image} onClick={() => setDrop(!drop)} />
+                    <User
+                        src={image}
+                        onClick={() => setDrop(!drop)}
+                        title="Minha Conta"
+                    />
                 </Section>
             </Container>
         </>
