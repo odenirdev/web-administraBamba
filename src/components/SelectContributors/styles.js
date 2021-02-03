@@ -46,14 +46,10 @@ export const Grid = styled.div.attrs({
     width: 100%;
 
     .select-user-container {
-        padding: 0 1rem 1rem 0;
+        padding: 0 0 1rem;
     }
 
     @media (max-width: 750px) {
-        .select-user-container {
-            padding: 0 0 1rem 0;
-        }
-
         .select-user-container:last-child {
             padding: 0;
         }

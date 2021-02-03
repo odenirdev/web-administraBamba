@@ -20,7 +20,7 @@ function List({ data, index: indexList }) {
                 show={showTask}
                 onClose={() => {
                     setShowTask(false);
-                    setSelectedTask({});
+                    setSelectedTask({ id: "" });
                 }}
                 title={
                     Object.keys(selectedTask).length === 0
@@ -32,7 +32,7 @@ function List({ data, index: indexList }) {
                     id={selectedTask.id}
                     onClose={() => {
                         setShowTask(false);
-                        setSelectedTask({});
+                        setSelectedTask({ id: "" });
                     }}
                 />
             </Modal>

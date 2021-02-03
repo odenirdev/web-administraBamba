@@ -144,6 +144,7 @@ const Index = ({ id, onClose }) => {
         if (id) {
             showTask();
         } else {
+            console.log("teste");
             setData(initalData);
 
             $("input[name=money-contribution]").val("");
@@ -183,7 +184,7 @@ const Index = ({ id, onClose }) => {
 
             setUsers(contributorsUsers);
         }
-    }, [board]);
+    }, [board, id]);
 
     function handleUpdateNotifications(data) {
         const newDataUsers = data.users;

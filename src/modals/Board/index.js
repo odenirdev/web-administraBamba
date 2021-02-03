@@ -53,12 +53,11 @@ const Index = ({ onClose, index: indexBoards }) => {
                 }));
 
                 setSelectedUsers(usersContributing);
-
-                setData({
-                    ...board,
-                    creator: board.creator,
-                });
             }
+
+            setData({
+                ...board,
+            });
         }
     }, [board]);
 
@@ -305,7 +304,6 @@ const Index = ({ onClose, index: indexBoards }) => {
                         </Button>
                     ) : (
                         <>
-                            {console.log(data)}
                             {((data && data.creator === me.id) ||
                                 (me.role && me.role.id >= 3)) && (
                                 <>
