@@ -8,9 +8,9 @@ import EmptyImage from "../../assets/images/empty.jpg";
 
 function Index({ image, username, email, onClick, show, selected }) {
     return (
-        <Container className="col-md-6 select-user-container" {...{ show }}>
+        <Container className="col-12 select-user-container" {...{ show }}>
             <Grid>
-                <div className="select-user-image col-3 ">
+                <div className="select-user-image col-2 ">
                     <img
                         src={
                             image
@@ -20,16 +20,16 @@ function Index({ image, username, email, onClick, show, selected }) {
                         alt="Seleção de usuário"
                     />
                 </div>
-                <div className="select-user-info col-7">
+                <div className="select-user-info col-9">
                     <strong>{username}</strong>
                     <span>{email}</span>
                 </div>
                 {selected ? (
-                    <div className="select-user-minus col-2" {...{ onClick }}>
+                    <div className="select-user-minus col-1" {...{ onClick }}>
                         <FaMinus size={12} />
                     </div>
                 ) : (
-                    <div className="select-user-plus col-2" {...{ onClick }}>
+                    <div className="select-user-plus col-1" {...{ onClick }}>
                         <FaPlus size={12} />
                     </div>
                 )}
