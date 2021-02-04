@@ -119,8 +119,6 @@ function Index() {
 
     function destroy(data) {
         try {
-            console.log(data);
-
             data.forEach(async (event) => {
                 await Api.put(`/events/${event.Id}`, { deleted: true });
 

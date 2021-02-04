@@ -17,6 +17,16 @@ export const fDate = (date, type) => {
 
             return iso;
 
+        case "local-date":
+            let y = new Date(date);
+            let w = y.getTimezoneOffset() * 60 * 1000;
+            let dateLocal = y - w;
+            dateLocal = new Date(dateLocal);
+            let isoDateLocal = dateLocal.toISOString();
+            isoDateLocal = isoDateLocal.slice(0, 16);
+
+            return isoDateLocal;
+
         case "datetime":
             let newDatetime = new Date(date).toISOString();
             return newDatetime.slice(0, newDatetime.indexOf("Z") - 7);
