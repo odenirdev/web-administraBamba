@@ -85,7 +85,9 @@ const Index = ({ data, index, indexList, onClick }) => {
             <div>
                 <span>
                     <FaCalendarAlt />
-                    {new Date(data.created_at).toLocaleDateString()}
+                    {new Date(
+                        `${data.createdAt}T23:59:59`
+                    ).toLocaleDateString()}
                 </span>
                 {data.dueDate && (
                     <span>

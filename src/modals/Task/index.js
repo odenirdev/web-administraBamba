@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState, useContext, useCallback } from "react";
 import { Row } from "react-bootstrap";
 import { Switch } from "react-og-forms";
 import {
@@ -34,10 +34,11 @@ import BoardContext from "../../components/Board/context";
 import { Container, StatusButton, MoneyIn } from "./styles";
 import api from "../../services/api";
 
-const Index = ({ id, onClose }) => {
+const Index = ({ id, onClose, indexList }) => {
     const initalData = {
         title: "",
         dueDate: "Y-m-d",
+        createdAt: "Y-m-d",
         description: "",
     };
 
@@ -68,6 +69,22 @@ const Index = ({ id, onClose }) => {
         $("input[name=money-contribution]").mask("#.##0,00", {
             reverse: true,
         });
+    }, []);
+
+    const clearData = useCallback(() => {
+        const initalData = {
+            title: "",
+            dueDate: "Y-m-d",
+            createdAt: "Y-m-d",
+            description: "",
+        };
+
+        setData(initalData);
+
+        $("input[name=money-contribution]").val("");
+        setSelectedAssets([]);
+        setSelectedUsers([]);
+        setCreateEvent(false);
     }, []);
 
     useEffect(() => {
@@ -103,7 +120,7 @@ const Index = ({ id, onClose }) => {
                     : undefined;
 
                 const priceEl = $("input[name=money-contribution]");
-                priceEl[1].value = Mask(price, "#.##0,00", {
+                priceEl[indexList].value = Mask(price, "#.##0,00", {
                     reverse: true,
                 });
 
@@ -135,23 +152,12 @@ const Index = ({ id, onClose }) => {
             }
         }
 
-        const initalData = {
-            title: "",
-            dueDate: "Y-m-d",
-            description: "",
-        };
-
         if (id) {
             showTask();
         } else {
-            console.log("teste");
-            setData(initalData);
-
-            $("input[name=money-contribution]").val("");
-            setSelectedAssets([]);
-            setSelectedUsers([]);
+            clearData();
         }
-    }, [id, idBoard]);
+    }, [clearData, id, idBoard, indexList]);
 
     useEffect(() => {
         async function showBoard() {
@@ -239,7 +245,9 @@ const Index = ({ id, onClose }) => {
     async function createMoneyContribution() {
         const priceEl = $("input[name=money-contribution]");
         const price = parseFloat(
-            String(priceEl[1].value).replaceAll(".", "").replace(",", ".")
+            String(priceEl[indexList].value)
+                .replaceAll(".", "")
+                .replace(",", ".")
         ).toFixed(2);
 
         if (!price || isNaN(price)) return;
@@ -280,7 +288,9 @@ const Index = ({ id, onClose }) => {
         if (data.wallet && Object.keys(data.wallet).length !== 0) {
             const priceEl = $("input[name=money-contribution]");
             const price = parseFloat(
-                String(priceEl[1].value).replaceAll(".", "").replace(",", ".")
+                String(priceEl[indexList].value)
+                    .replaceAll(".", "")
+                    .replace(",", ".")
             ).toFixed(2);
 
             if (price === parseFloat(data.wallet.price).toFixed(2)) {
@@ -385,9 +395,7 @@ const Index = ({ id, onClose }) => {
 
             indexBoard();
             onClose();
-            setData(initalData);
-            setSelectedUsers([]);
-            setSelectedAssets([]);
+            clearData();
             Notification("success", "Tarefa cadastrada");
         } catch (error) {
             Error(error);
@@ -412,9 +420,7 @@ const Index = ({ id, onClose }) => {
 
             indexBoard();
             onClose();
-            setData(initalData);
-            setSelectedUsers([]);
-            setSelectedAssets([]);
+            clearData();
             Notification("success", "Tarefa atualizada");
         } catch (error) {
             Error(error);
@@ -447,22 +453,12 @@ const Index = ({ id, onClose }) => {
             });
 
             indexBoard();
-            setData(initalData);
-            setSelectedUsers([]);
-            setSelectedAssets([]);
+            clearData();
             onClose();
             Notification("success", "Tarefa removido");
         } catch (error) {
             Error(error);
         }
-    }
-
-    function addDays(date, days) {
-        let result = new Date(new Date(date).setHours(1));
-        result = new Date(
-            result.setDate(result.getDate() + days)
-        ).toISOString();
-        return result;
     }
 
     function serializerDataEvent(data) {
@@ -471,7 +467,7 @@ const Index = ({ id, onClose }) => {
             description,
             users,
             dueDate: endTime,
-            created_at,
+            createdAt,
         } = data;
 
         if (!users.includes(me.id)) {
@@ -481,12 +477,10 @@ const Index = ({ id, onClose }) => {
         return {
             subject,
             description,
-            startTime: created_at
-                ? new Date(created_at).setHours(0, 0)
-                : new Date().setHours(0, 0),
+            startTime: createdAt ? createdAt : new Date().setHours(0, 0),
             endTime: endTime
-                ? new Date(endTime).setHours(0, 0)
-                : new Date(created_at ? created_at : new Date()).setHours(0, 0),
+                ? `${endTime}T23:59:59`
+                : new Date(createdAt ? createdAt : new Date()).setHours(0, 0),
             users,
             isAllDay: true,
             isReadOnly: true,
@@ -520,16 +514,25 @@ const Index = ({ id, onClose }) => {
             return Notification("warning", "Título é obrigatório");
         }
 
+        if (!data.createdAt) {
+            return Notification("warning", "Início é obrigatório");
+        }
+
+        if (
+            data.dueDate &&
+            new Date(data.dueDate).getTime() <
+                new Date(data.createdAt).getTime()
+        ) {
+            return Notification(
+                "warning",
+                "Vencimento deve ser maior ou igual a Início"
+            );
+        }
+
         let requestData;
         const users = selectedUsers.map((user) => user.value);
 
         requestData = { ...data, users };
-
-        if (!requestData.dueDate || requestData.dueDate === "Y-m-d") {
-            delete requestData.dueDate;
-        } else {
-            requestData.dueDate = addDays(requestData.dueDate, 2);
-        }
 
         if (createEvent) {
             if (data.event) {
@@ -592,6 +595,19 @@ const Index = ({ id, onClose }) => {
                             value={data.title || ""}
                             onChange={(event) =>
                                 setData({ ...data, title: event.target.value })
+                            }
+                        />
+                    </FormItem>
+                    <FormItem>
+                        <Input
+                            type="date"
+                            label="Início*"
+                            value={data.createdAt}
+                            onChange={(event) =>
+                                setData({
+                                    ...data,
+                                    createdAt: event.target.value,
+                                })
                             }
                         />
                     </FormItem>

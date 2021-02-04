@@ -211,6 +211,10 @@ const Index = ({ onClose, index: indexBoards }) => {
                 try {
                     data.lists.forEach((list) => {
                         list.tasks.map(async (task) => {
+                            await Api.put(`/events/${task.event}`, {
+                                deleted: true,
+                            });
+
                             await Api.put(`/tasks/${task.id}`, {
                                 deleted: true,
                             });
