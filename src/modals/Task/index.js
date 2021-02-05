@@ -534,6 +534,10 @@ const Index = ({ id, onClose, indexList }) => {
 
         requestData = { ...data, users };
 
+        if (requestData.dueDate === "Y-m-d") {
+            delete requestData.dueDate;
+        }
+
         if (createEvent) {
             if (data.event) {
                 handleUpdateEvent(requestData, data.event);
