@@ -40,6 +40,8 @@ function Index({ value, onChange }) {
                     let totalQuantity = 0;
 
                     inventory_movements.forEach((movement) => {
+                        if (movement.deleted) return;
+
                         if (movement.type) {
                             totalQuantity += movement.quantity;
                         } else {
