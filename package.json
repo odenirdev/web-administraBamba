@@ -14,7 +14,7 @@
         "datatables": "^1.10.18",
         "datatables.net": "^1.10.21",
         "firebase": "^8.2.0",
-        "immer": "^8.0.0",
+        "immer": "^9.0.6",
         "jquery": "^3.5.1",
         "jquery-mask-plugin": "^1.14.16",
         "react": "^17.0.1",
